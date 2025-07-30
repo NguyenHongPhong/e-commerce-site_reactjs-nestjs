@@ -10,7 +10,6 @@ function Header() {
                     </div></Link>
                 <nav className="text-lg grow flex justify-between items-center">
                     <Link to="/">Home</Link>
-                    <Link to="/shop">Shop</Link>
                     <Link to="/categories">Categories</Link>
                     <Link to="/about">About</Link>
                     <Link to="/contact">Contact</Link>

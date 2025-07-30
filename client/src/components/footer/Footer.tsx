@@ -1,4 +1,6 @@
 import { Link } from "react-router"
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faFacebook, faLinkedinIn, faXTwitter } from '@fortawesome/free-brands-svg-icons';
 function Footer() {
     return (<footer>
         <div className="@container">
@@ -11,6 +13,11 @@ function Footer() {
                         </div></Link>
                     <div className="mt-5 text-center text-sm text-gray-500 border-t pt-4">
                         © {new Date().getFullYear()} MyShop. All rights reserved.
+                    </div>
+                    <div className="flex mt-5 w-2/5 justify-between">
+                        <FontAwesomeIcon icon={faFacebook} color="#0866ff" className="hover:opacity-80 hover:cursor-pointer" />
+                        <FontAwesomeIcon icon={faLinkedinIn} color="#0a66c2" className="hover:opacity-80 hover:cursor-pointer" />
+                        <FontAwesomeIcon icon={faXTwitter} color="black" className="hover:opacity-80 hover:cursor-pointer" />
                     </div>
                 </div>
                 <div>
@@ -48,15 +55,10 @@ function Footer() {
                             placeholder="Your email"
                             className="w-full px-3 py-2 border rounded mb-2"
                         />
-                        <button className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">
+                        <button className="w-full bg-[var(--primary)] text-white py-2 rounded hover:bg-blue-700">
                             Subscribe
                         </button>
                     </form>
-                    <div className="flex space-x-4">
-                        <i className="fa-brands fa-facebook"></i>
-                        <i className="fa-brands fa-linkedin"></i>
-                        <i className="fa-brands fa-square-x-twitter">Bug in here</i>
-                    </div>
                 </div>
             </div>
         </div>
