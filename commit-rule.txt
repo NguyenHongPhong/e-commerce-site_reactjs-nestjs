@@ -1,0 +1,23 @@
+Type	Mục đích
+feat	Thêm tính năng mới (feature)
+fix	Sửa lỗi
+refactor	Refactor code (không thêm tính năng, không sửa bug)
+style	Thay đổi định dạng, khoảng trắng, dấu câu,… không ảnh hưởng đến logic
+docs	Thêm/sửa tài liệu (README, comment,...)
+test	Thêm/sửa test
+chore	Việc linh tinh: cập nhật cấu hình, dependency,...
+perf	Cải thiện hiệu năng
+ci	Thay đổi về CI/CD (workflow, pipeline...)
+build	Thay đổi ảnh hưởng tới build system hoặc dependency
+revert	Revert lại commit trước đó
+
+<type>(optional-scope): <message>
+
+Examples:
+feat(auth): thêm đăng nhập bằng Google
+fix(cart): fix bug thêm sản phẩm trùng ID
+refactor(product): tách component ProductCard
+style: định dạng lại file header.tsx
+docs(readme): thêm hướng dẫn chạy project
+test: thêm unit test cho hàm tính giá
+chore: nâng cấp tailwind lên v3.4.1
