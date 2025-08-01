@@ -4,7 +4,7 @@ function ArrowSide(props: ISideDirection) {
     const { side, arrowSide } = props;
     return (
         <div className={`${side} top-1/2 -translate-y-1/2 absolute`}>
-            <div className="flex items-center justify-center h-12 w-7 bg-[rgba(0,0,0,0.4)]">
+            <div className="flex items-center justify-center h-12 w-7 bg-[rgba(0,0,0,0.7)]">
                 <FontAwesomeIcon icon={arrowSide} color="#fff" />
             </div>
         </div>
