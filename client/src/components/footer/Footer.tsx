@@ -8,7 +8,7 @@ function Footer() {
                 <div>
                     <Link to="/" className="grow flex items-center">
                         <div className="flex items-center">
-                            <img className="w-8 h-8 mr-2.5" src="../../../public/logo/icon.svg" alt="Logo" />
+                            <img className="w-8 h-8 mr-2.5" src="public/logo/icon.svg" alt="Logo" />
                             <div className="w-36 h-8 text-gray-900 text-xl font-bold font-['Gordita'] leading-loose">E-commerce</div>
                         </div></Link>
                     <div className="mt-5 text-center text-sm text-gray-500 border-t pt-4">
