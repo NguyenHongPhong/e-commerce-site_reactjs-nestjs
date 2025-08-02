@@ -2,10 +2,11 @@ import { IconDefinition } from "@fortawesome/fontawesome-svg-core";
 
 export interface ISideDirection {
     side: string,
-    arrowSide: IconDefinition
+    arrowSide: IconDefinition,
+    onClick: () => void
 }
 
 export interface IDot {
-    index: number,
+    indexSlider: number,
     quantity: number
 }

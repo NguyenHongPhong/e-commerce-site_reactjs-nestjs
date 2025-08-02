@@ -13,14 +13,6 @@
     --breakpoint-2xl: 1360px;
 }
 
-#slider {
-    transition: opacity 0.5s ease-in-out;
-    opacity: 1;
-}
-
-.fade-out {
-    opacity: 0;
-}
 
 @layer utilities {
     .\@container {
