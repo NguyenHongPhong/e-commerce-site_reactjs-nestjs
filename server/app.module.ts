@@ -1,11 +1,12 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { AppController } from './controllers/app.controller';
+import { AppController } from './app.controller';
 
 @Module({
     imports: [
         ConfigModule.forRoot({
-            isGlobal: true, // giúp dùng ở mọi nơi không cần import lại
+            envFilePath: '.env',
+            isGlobal: true,
         }),
     ],
     controllers: [AppController],
