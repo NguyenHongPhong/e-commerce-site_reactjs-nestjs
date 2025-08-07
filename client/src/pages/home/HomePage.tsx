@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from 'axios';
+import PromoSearchBar from "../../components/searchBar/PromoSearchBar";
+import Slider from "../../components/slider/Slider";
 const apiUrl = import.meta.env.VITE_API_URL;
 
 function HomePage() {
@@ -12,7 +14,11 @@ function HomePage() {
             .catch(err => console.error(err));
     }, []);
     return (
-        <>{data}</>
+        <>
+            <PromoSearchBar />
+            <Slider />
+            {data}
+        </>
     )
 }
 
