@@ -15,10 +15,10 @@ function Header() {
                     <Link to="/contact">Contact</Link>
                 </nav>
                 <div className="flex items-center grow justify-end">
-                    <div className="mr-5 text-gray-900 text-base font-semibold font-['Plus_Jakarta_Sans'] leading-7">Log in</div>
-                    <div className="w-28 h-12 bg-gray-900 rounded-md flex justify-center items-center">
+                    <Link to="/login" className="mr-5 text-gray-900 text-base font-semibold font-['Plus_Jakarta_Sans'] leading-7">Log in</Link>
+                    <Link to="/register" className="w-28 h-12 bg-gray-900 rounded-md flex justify-center items-center hover:opacity-85">
                         <span className="text-white">Sign up</span>
-                    </div>
+                    </Link>
                 </div>
             </div>
         </div>
