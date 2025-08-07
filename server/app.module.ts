@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
+import { UserModule } from './user/user.module';
 
 @Module({
     imports: [
@@ -8,6 +9,7 @@ import { AppController } from './app.controller';
             envFilePath: '.env',
             isGlobal: true,
         }),
+        UserModule
     ],
     controllers: [AppController],
     providers: [],

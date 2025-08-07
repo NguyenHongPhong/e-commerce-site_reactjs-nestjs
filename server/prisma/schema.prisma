@@ -16,7 +16,7 @@ datasource db {
 
 model User {
   id                String    @id @default(uuid())
-  status_id         String
+  status_id         Int
   username          String
   password          String
   first_name        String
@@ -24,10 +24,22 @@ model User {
   email             String    @unique
   portrait          String?
   phone_number      String?
-  accountType       String
   isShop            Boolean   @default(false)
   email_verified_at Boolean   @default(false)
   last_login_at     DateTime?
   created_at        DateTime  @default(now())
   updated_at        DateTime  @updatedAt
+}
+
+enum UserStatusName {
+  active
+  inactive
+  pending
+  suspended
+  banned
+}
+
+model User_Status {
+  id   Int            @id
+  name UserStatusName @default(active)
 }

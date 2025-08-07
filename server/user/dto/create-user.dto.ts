@@ -8,7 +8,7 @@ import {
 
 export class CreateUserDto {
     @IsString()
-    status_id!: string;
+    status_id!: number;
 
     @IsString()
     username!: string;
@@ -32,9 +32,6 @@ export class CreateUserDto {
     @IsOptional()
     @IsString()
     phone_number?: string;
-
-    @IsString()
-    accountType!: string;
 
     @IsOptional()
     @IsBoolean()

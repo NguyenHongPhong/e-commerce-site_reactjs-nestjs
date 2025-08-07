@@ -1,6 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import * as dotenv from 'dotenv';
+import { PrismaExceptionFilter } from './common/filters/prisma-exception.filter';
 dotenv.config();
 
 async function bootstrap() {
@@ -9,6 +10,7 @@ async function bootstrap() {
         origin: process.env.CLIENT_URL,
         credentials: true,
     });
+    app.useGlobalFilters(new PrismaExceptionFilter());
     const port = process.env.PORT;
     await app.listen(port || 3000);
     console.log(`Server is running on port ${port}`);
