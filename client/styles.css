@@ -50,3 +50,15 @@
         }
     }
 }
+
+.input-style {
+    @apply flex justify-between w-full items-center rounded-[10px] p-3 outline-1 outline-offset-[-1px] outline-zinc-300;
+}
+
+.input-field {
+    @apply outline-0 w-full pr-5;
+}
+
+.btn-yellow {
+    @apply w-full p-3 bg-yellow-500 rounded-[10px] inline-flex justify-center items-start gap-2.5 hover:opacity-90 hover:cursor-pointer;
+}

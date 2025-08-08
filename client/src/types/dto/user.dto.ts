@@ -1,5 +1,5 @@
-export interface UserDto {
-    status_id: string
+export interface IUserDto {
+    status_id?: string
     first_name: string;
     last_name: string;
     username: string;
