@@ -9,12 +9,7 @@ export class UserController {
 
     @Post()
     async create(@Body() createUserDto: CreateUserDto) {
-        const a = createUserDto;
         return await this.userService.create(createUserDto);
     }
 
-    @Get()
-    findAll() {
-        return this.userService.findAll();
-    }
 }

@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import * as dotenv from 'dotenv';
 import { PrismaExceptionFilter } from './common/filters/prisma-exception.filter';
+import { PrismaService } from './prisma/prisma.service';
 dotenv.config();
 
 async function bootstrap() {
@@ -11,6 +12,9 @@ async function bootstrap() {
         credentials: true,
     });
     app.useGlobalFilters(new PrismaExceptionFilter());
+    const prismaService = app.get(PrismaService);
+    //close when program is ended
+    await prismaService.enableShutdownHooks(app);
     const port = process.env.PORT;
     await app.listen(port || 3000);
     console.log(`Server is running on port ${port}`);
