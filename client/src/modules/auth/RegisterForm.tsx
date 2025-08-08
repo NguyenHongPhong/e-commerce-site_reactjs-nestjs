@@ -1,97 +1,202 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUser, faEnvelope, faEye, faPhone } from "@fortawesome/free-solid-svg-icons";
 import { useState } from "react";
-const apiUrl = import.meta.env.VITE_API_URL;
+import { IUserDto } from "../../types/dto/user.dto";
+import { createUser } from "../../api/user";
+import { useAppDispatch } from "../../hooks";
+import { disableLoading, enableLoading } from "../../reducers/loading";
+import { notify } from "../../utils/toast";
+import { useForm } from "react-hook-form";
+import { FormValues } from "../../types/ui";
+import { AxiosError } from 'axios';
+import { Link } from "react-router";
 export default function () {
+
+    const {
+        register,
+        handleSubmit,
+        watch,
+        reset,
+        formState: { errors },
+    } = useForm<FormValues>();
+    const dispatch = useAppDispatch();
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-    const handlerShowPassword = () => {
-        setShowPassword(!showPassword);
-    };
-    const handlerConfirmPassword = () => {
-        setShowConfirmPassword(!showConfirmPassword);
+    const onSubmit = async (data: FormValues) => {
+        const newUser: IUserDto = {
+            first_name: data.first_name as string,
+            last_name: data.last_name as string,
+            username: data.username as string,
+            password: data.password as string,
+            email: data.email as string,
+            phone_number: data.phone_number as string
+        }
+
+
+        try {
+            dispatch(enableLoading());
+            const res = await createUser(newUser);
+            reset();
+            setTimeout(() => {
+                dispatch(disableLoading());
+                notify("Registration successful!", "success");
+            }, 2000);
+        } catch (err) {
+            reset();
+            const error = err as AxiosError;
+            const message = (error.response?.data as any)?.message;
+            console.error("Error creating user:", message);
+            dispatch(disableLoading());
+            notify(message, "error");
+        }
     };
 
     return (
-        <form className="flex justify-center" action={`${apiUrl}/users`} method="POST">
-            <div className="mt-10 flex flex-col gap-7 w-[70%]">
-                <input className="hidden" type="text" name="status_id" value={"0"} />
-                <div className=" flex justify-between w-full items-center rounded-[10px] p-3 outline-1 
-                            outline-offset-[-1px] outline-zinc-300">
-                    <input className="outline-0 w-full pr-5" type="text" name="first_name" placeholder="Enter first name..."
-                        required />
+        <form className="flex justify-center" onSubmit={handleSubmit(onSubmit)}>
+            <div className="mt-10 flex flex-col gap-3 w-[70%]">
+
+                {/* First Name */}
+                <div className="input-style">
+                    <input
+                        {...register("first_name", { required: "First name is required" })}
+                        className="input-field"
+                        type="text"
+                        placeholder="Enter first name..."
+                    />
                     <FontAwesomeIcon icon={faUser} />
                 </div>
-                <div className=" flex justify-between w-full items-center rounded-[10px] p-3 outline-1 
-                            outline-offset-[-1px] outline-zinc-300">
-                    <input className="outline-0 w-full pr-5" type="text" name="last_name" placeholder="Enter last name..."
-                        required />
+                {errors.first_name && <p className="text-red-500">{errors.first_name.message}</p>}
+
+                {/* Last Name */}
+                <div className="input-style">
+                    <input
+                        {...register("last_name", { required: "Last name is required" })}
+                        className="input-field"
+                        type="text"
+                        placeholder="Enter last name..."
+                    />
                     <FontAwesomeIcon icon={faUser} />
                 </div>
-                <div className=" flex justify-between w-full items-center rounded-[10px] p-3 outline-1 
-                            outline-offset-[-1px] outline-zinc-300">
-                    <input className="outline-0 w-full pr-5" type="text" name="username" placeholder="Enter user name..."
-                        required />
+                {errors.last_name && <p className="text-red-500">{errors.last_name.message}</p>}
+
+                {/* Username */}
+                <div className="input-style">
+                    <input
+                        {...register("username", { required: "Username is required" })}
+                        className="input-field"
+                        type="text"
+                        placeholder="Enter user name..."
+                    />
                     <FontAwesomeIcon icon={faUser} />
                 </div>
-                <div className=" flex justify-between w-full items-center rounded-[10px] p-3 outline-1 
-                            outline-offset-[-1px] outline-zinc-300">
-                    <input id="password" className="outline-0 w-full pr-5" type={showPassword ? "text" : "password"}
-                        name="password" placeholder="Enter password..." required />
-                    <FontAwesomeIcon className="hover:cursor-pointer hover:opacity-50" icon={faEye}
-                        onClick={() => handlerShowPassword()} />
+                {errors.username && <p className="text-red-500">{errors.username.message}</p>}
+
+                {/* Password */}
+                <div className="input-style">
+                    <input
+                        {...register("password", { required: "Password is required" })}
+                        className="input-field"
+                        type={showPassword ? "text" : "password"}
+                        placeholder="Enter password..."
+                    />
+                    <FontAwesomeIcon
+                        className="hover:cursor-pointer hover:opacity-50"
+                        icon={faEye}
+                        onClick={() => setShowPassword(!showPassword)}
+                    />
                 </div>
-                <div className=" flex justify-between w-full items-center rounded-[10px] p-3 outline-1 
-                            outline-offset-[-1px] outline-zinc-300">
-                    <input id="confirm-password" className="outline-0 w-full pr-5"
+                {errors.password && <p className="text-red-500">{errors.password.message}</p>}
+
+                {/* Confirm Password */}
+                <div className="input-style">
+                    <input
+                        {...register("confirm_password", {
+                            required: "Please confirm your password",
+                            validate: (val) => val === watch("password") || "Passwords do not match",
+                        })}
+                        className="input-field"
                         type={showConfirmPassword ? "text" : "password"}
-                        placeholder="Confirm password..." required />
-                    <FontAwesomeIcon className="hover:cursor-pointer hover:opacity-50" icon={faEye}
-                        onClick={() => handlerConfirmPassword()} />
+                        placeholder="Confirm password..."
+                    />
+                    <FontAwesomeIcon
+                        className="hover:cursor-pointer hover:opacity-50"
+                        icon={faEye}
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    />
                 </div>
-                <div className=" flex justify-between w-full items-center rounded-[10px] p-3 outline-1 
-                            outline-offset-[-1px] outline-zinc-300">
-                    <input className="outline-0 w-full pr-5" type="email" name="email" placeholder="Enter your email..."
-                        required />
+                {errors.confirm_password && (
+                    <p className="text-red-500">{errors.confirm_password.message}</p>
+                )}
+
+                {/* Email */}
+                <div className="input-style">
+                    <input
+                        {...register("email", {
+                            required: "Email is required",
+                            pattern: {
+                                value: /^\S+@\S+$/i,
+                                message: "Invalid email format",
+                            },
+                        })}
+                        className="input-field"
+                        type="email"
+                        placeholder="Enter your email..."
+                    />
                     <FontAwesomeIcon icon={faEnvelope} />
                 </div>
-                <div className=" flex justify-between w-full items-center rounded-[10px] p-3 outline-1 
-                            outline-offset-[-1px] outline-zinc-300">
-                    <input className="outline-0 w-full pr-5" type="text" name="phone_number"
-                        placeholder="Enter your phone number..." required />
+                {errors.email && <p className="text-red-500">{errors.email.message}</p>}
+
+                {/* Phone */}
+                <div className="input-style">
+                    <input
+                        {...register("phone_number", {
+                            required: "Phone number is required",
+                            minLength: { value: 10, message: "Phone must be 10 digits" },
+                            maxLength: { value: 10, message: "Phone must be 10 digits" },
+                            pattern: { value: /^[0-9]+$/, message: "Only numbers allowed" },
+                        })}
+                        className="input-field"
+                        type="text"
+                        placeholder="Enter your phone number..."
+                    />
                     <FontAwesomeIcon icon={faPhone} />
                 </div>
-                <div className="flex justify-between items-center">
-                    <div className="flex justify-between items-center">
-                        <input className="mr-3" type="checkbox" name="remember-me" />
-                        <p className="mb-1">Remember me</p>
-                    </div>
-                    <div className="justify-start text-sky-600 text-base font-medium font-['Gordita'] leading-snug">
-                        Recovery Password</div>
-                </div>
+                {errors.phone_number && <p className="text-red-500">{errors.phone_number.message}</p>}
 
-                <button type="submit" className="w-full p-3 bg-yellow-500 rounded-[10px] inline-flex justify-center 
-                items-start gap-2.5 hover:opacity-90 hover:cursor-pointer">
-                    <div className="text-center  text-gray-900 text-lg font-medium font-['Gordita'] leading-relaxed">Sign Up</div>
+                {/* Remember Me */}
+                {/* <div className="flex justify-between items-center">
+                    <div className="flex justify-between items-center">
+                        <input {...register("remember_me")} className="mr-3" type="checkbox" />
+                        <p>Remember me</p>
+                    </div>
+                    <div className="justify-start text-sky-600 text-base font-medium leading-snug">
+                        Recovery Password
+                    </div>
+                </div> */}
+
+                {/* Submit Button */}
+                <button type="submit" className="btn-yellow">
+                    <div className="text-center text-gray-900 text-lg font-medium">Sign Up</div>
                 </button>
 
-                <div className="w-full  p-3 rounded-[10px]  outline-1 outline-offset-[-1px] outline-zinc-300 inline-flex
-                 flex-col justify-center items-center gap-2.5">
+                {/* Sign in with Gmail */}
+                <div className="w-full p-3 rounded-[10px] outline-1 outline-offset-[-1px] outline-zinc-300
+                 inline-flex flex-col justify-center items-center gap-2.5 hover:cursor-pointer">
                     <div className="inline-flex justify-start items-center gap-2.5">
                         <div className="w-6 h-6 relative overflow-hidden">
                             <img src="/public/icons/google-icon.png" className="w-6 h-6" alt="google-icon" />
                         </div>
-                        <div className="justify-start text-gray-900 text-lg font-medium font-['Gordita'] leading-relaxed">
-                            Sign in with Gmail</div>
+                        <div className="text-gray-900 text-lg font-medium">Sign up with Gmail</div>
                     </div>
                 </div>
 
-                <div className="flex justify-between px-10">
-                    <div className="text-zinc-400 text-lg font-normal font-['Gordita'] leading-relaxed">You have an account
-                        yet?</div>
-                    <div className=" text-sky-600 text-lg font-medium font-['Gordita'] leading-relaxed">Sign In</div>
-                </div>
+                {/* Bottom Sign In Link */}
+                <Link to={"/login"} className="flex justify-center px-10 ">
+                    {/* <Link to={"/login"} className="text-zinc-400 text-lg">You have an account yet?</Link> */}
+                    <div className="text-sky-600 text-lg font-medium hover:cursor-pointer hover:opacity-50">Sign In</div>
+                </Link>
             </div>
-        </form>)
+        </form>
+    );
 }
