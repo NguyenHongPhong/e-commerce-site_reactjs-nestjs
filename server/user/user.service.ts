@@ -1,7 +1,7 @@
 import { Injectable, ConflictException } from '@nestjs/common';
 import { UserRepository } from './user.repository';
 import { CreateUserDto } from './dto/create-user.dto';
-import { USER_STATUS } from '../constants/app.constant';
+import { USER_STATUS } from '../common/constants/app.constant';
 
 @Injectable()
 export class UserService {
