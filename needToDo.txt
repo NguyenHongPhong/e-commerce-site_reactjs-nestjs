@@ -1,2 +1,2 @@
 Khi scroll xuống thay vì ra ngay lập tức thì nó sẽ opacity từ từ
-RegiterUI: chia ra 2 bên một bên là img một bên là form
+Xác thực 2 lớp

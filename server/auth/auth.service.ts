@@ -6,7 +6,7 @@ import { OAuth2Client } from 'google-auth-library';
 import { UserRepository } from '../user/user.repository';
 import { PrismaClient } from '../generated/prisma';
 import { CreateUserDto } from '../user/dto/create-user.dto';
-import { USER_STATUS } from '../common/constants/app.constant';
+import { USER_STATUS, ROLES } from '../common/constants/app.constant';
 
 
 @Injectable()
@@ -17,6 +17,7 @@ export class AuthService {
     private oauth2Client: OAuth2Client;
     private jwtSecret: string;
     private userRepository = new UserRepository(new PrismaClient());
+    private jwtRefreshSecret: string;
 
     constructor(private configService: ConfigService) {
         this.clientId = this.configService.get<string>('GOOGLE_CLIENT_ID')!;
@@ -24,6 +25,7 @@ export class AuthService {
         this.redirectUri = this.configService.get<string>('GOOGLE_REDIRECT_URI')!;
         this.oauth2Client = new OAuth2Client(this.clientId, this.clientSecret, this.redirectUri);
         this.jwtSecret = this.configService.get<string>('JWT_SECRET')!;
+        this.jwtRefreshSecret = this.configService.get<string>('JWT_REFRESH_SECRET')!;
     }
 
     // Gửi request đổi code lấy token từ Google
@@ -43,12 +45,13 @@ export class AuthService {
             });
             return res.data;
         } catch (error) {
+            console.log(error);
             throw new HttpException('Failed to fetch tokens from Google', HttpStatus.BAD_REQUEST);
         }
     }
 
     // Giải mã id_token lấy thông tin user
-    async verifyIdToken(idToken: string) {
+    async verifyIdTokenOfGoogle(idToken: string) {
         try {
             const ticket = await this.oauth2Client.verifyIdToken({
                 idToken,
@@ -63,21 +66,51 @@ export class AuthService {
     }
 
     generateJwt(payload: any) {
-        return jwt.sign(payload, this.jwtSecret, { expiresIn: '1h' });
+        return jwt.sign(payload, this.jwtSecret);
     }
 
+    generateRefreshToken(payload: any) {
+        return jwt.sign(payload, this.jwtRefreshSecret, {
+            expiresIn: '7d', // Refresh token sống 7 ngày
+        });
+    }
     // Hàm tổng hợp lấy token và giải mã user info
     async loginWithGoogle(code: string) {
-        const tokens = await this.getTokens(code);
-        const userInfo = await this.verifyIdToken(tokens.id_token);
-        // Tạo JWT riêng cho app dựa trên info user (ví dụ email, sub)
-        const jwtToken = this.generateJwt({
-            email: userInfo.email,
-            sub: userInfo.sub,
-            name: userInfo.name,
-        });
 
-        return { jwtToken, userInfo };
+        try {
+            const tokens = await this.getTokens(code);
+            const userInfo = await this.verifyIdTokenOfGoogle(tokens.id_token);
+            // Tạo JWT riêng cho app dựa trên info user (ví dụ email, sub)
+
+            const addedUser = await this.addUserProvider(userInfo)
+            const now = Math.floor(Date.now() / 1000);
+
+            const accessToken = this.generateJwt({
+                sub: addedUser.id,         // Subject - ID của user trong DB của bạn, định danh duy nhất người sở hữu token
+                iss: "e-commerce",         // Issuer - ai phát hành token này (ở đây là hệ thống e-commerce của bạn)
+                aud: this.clientId,        // Audience - ai được phép sử dụng token (thường là clientId hoặc tên ứng dụng)
+                iat: now,                  // Issued At - thời điểm token được phát hành (timestamp, tính bằng giây)
+                exp: now + 60 * 60,        // Expiration Time - thời điểm token hết hạn (ở đây là sau 1 giờ)
+                nbf: now,                   // Not Before - nếu gọi và xử lý trước thời điểm này...token sẽ không hợp lệ (ở đây là hợp lệ ngay lập tức)
+                username: addedUser.username,
+                email: addedUser.email,
+                role: ROLES.customer,
+                permissions: "",
+                portraitUrl: addedUser.portrait,
+            });
+            const refreshToken = this.generateRefreshToken({
+                sub: addedUser.id,
+                iss: "e-commerce",
+                aud: this.clientId,
+                iat: now,
+            });
+
+            return { accessToken, refreshToken };
+
+        } catch (error) {
+            console.log(error);
+            throw new HttpException('Failed to login from Google', HttpStatus.BAD_REQUEST);
+        }
     }
 
     async addUserProvider(userInfo: any) {
@@ -91,11 +124,11 @@ export class AuthService {
         newUser.status_id = USER_STATUS.active;
         newUser.last_login_at = new Date().toISOString();
         newUser.password = "";
-        newUser.isShop = false;
         newUser.email_verified_at = false;
+        newUser.providerId = userInfo.sub;
+        newUser.provider = "google";
 
-        const addedUser = this.addUserProvider(newUser);
-
+        return await this.userRepository.createUser(newUser);
 
     }
 }

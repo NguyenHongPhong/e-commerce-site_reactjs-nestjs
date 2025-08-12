@@ -5,3 +5,10 @@ export const USER_STATUS = {
     suspended: 4,
     banned: 5
 }
+
+export const ROLES = {
+    admin: 1,
+    seller: 2,
+    customer: 3,
+    guest: 4
+}

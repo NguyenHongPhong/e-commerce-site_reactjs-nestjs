@@ -27,6 +27,8 @@ model User {
   isShop            Boolean   @default(false)
   email_verified_at Boolean   @default(false)
   last_login_at     DateTime?
+  providerId        String?
+  provider          String?
   created_at        DateTime  @default(now())
   updated_at        DateTime  @updatedAt
 }
@@ -41,13 +43,10 @@ enum UserStatusName {
 
 model User_Status {
   id   Int            @id
-  name UserStatusName @default(active)
+  name UserStatusName
 }
 
-model User_Providers {
-  id         String   @id @default(uuid())
-  userId     String
-  providerId String
-  provider   String   @default("google")
-  createdAt  DateTime @default(now())
+model Roles {
+  id   Int    @id
+  name String @unique
 }
