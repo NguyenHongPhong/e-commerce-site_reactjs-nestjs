@@ -5,8 +5,7 @@ const API_BASE = '/users';
 export const getUsers = () => api.get(API_BASE);
 export const getUserById = (id: string) => api.get(`${API_BASE}/${id}`);
 export const createUser = (data: IUserDto) => {
-    console.log(data);
-
     return api.post(API_BASE, data);
 };
+export const getProfile = () => api.get(API_BASE + '/me');
 

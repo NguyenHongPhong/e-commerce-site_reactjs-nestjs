@@ -1,10 +1,9 @@
 import api from ".";
-const API_BASE = '/auth/callback';
+import { ILoginUserDto } from "../types/dto/login-user.dto";
+const API_BASE = '/auth';
 
-export const loginByEmail = (code: string) => {
-    console.log(code);
-
-    return api.post(API_BASE, { code });
+export const login = (data: ILoginUserDto) => {
+    return api.post(API_BASE + '/login', { data });
 }
 
 

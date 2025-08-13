@@ -1,4 +1,4 @@
-import { Controller, Get, Res, Req, HttpException, HttpStatus, Query } from '@nestjs/common';
+import { Controller, Get, Res, Body, HttpException, HttpStatus, Query, Post } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { Response } from 'express';
 import { AxiosError } from 'axios';
@@ -25,8 +25,26 @@ export class AuthController {
                 throw new HttpException('Authorization code is missing', HttpStatus.BAD_REQUEST);
             }
 
-            // // Lấy token và gửi về phía client
-            const { accessToken, refreshToken } = await this.authService.loginWithGoogle(code);
+            await this.authService.loginWithGoogle(code);
+
+            const messageEncoded = encodeURIComponent('Register successfully');
+
+            return res.redirect(`${this.clientUrl}/register?message=${messageEncoded}`);
+        } catch (error) {
+            const err = error as AxiosError;
+            const messageFailed = encodeURIComponent('Register failed !!!!');
+            return res.redirect(
+                `${this.clientUrl}/register?error=${err}&message=${messageFailed}`
+            );
+        }
+
+    }
+
+    @Post('login')
+    async login(@Body() body: any, @Res() res: Response) {
+        const { data } = body;
+        const { accessToken } = await this.authService.logIn(data.email, data.password);
+        if (accessToken) {
 
             // Lưu refresh token vào cookie HTTP-only
             res.cookie('accessToken', accessToken, {
@@ -35,18 +53,9 @@ export class AuthController {
                 sameSite: 'strict',
                 maxAge: 7 * 24 * 60 * 60 * 1000 // 7 ngày
             });
-
-            const accessTokenEncoded = encodeURIComponent(accessToken);
-            const messageEncoded = encodeURIComponent('Register successfully');
-
-            return res.redirect(`${this.clientUrl}/register?accessToken=${accessTokenEncoded}&message=${messageEncoded}`);
-        } catch (error) {
-            const err = error as AxiosError;
-            return res.redirect(
-                `${this.clientUrl}/register?error=${err}`
-            );
+            const message = "Login successfully !!!";
+            return res.json({ message });
         }
-
     }
 
 }

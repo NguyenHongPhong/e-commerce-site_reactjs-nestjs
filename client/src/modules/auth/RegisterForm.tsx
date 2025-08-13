@@ -10,7 +10,6 @@ import { useForm } from "react-hook-form";
 import { FormValues } from "../../types/ui";
 import { AxiosError } from 'axios';
 import { Link, useSearchParams } from "react-router";
-import { loginByEmail } from "../../api/auth";
 import { useLocation } from 'react-router-dom';
 
 const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
@@ -23,15 +22,14 @@ export default function () {
     const location = useLocation();
     const [params] = useSearchParams(location.search);
     useEffect(() => {
-        const accessToken = params.get('accessToken');
         const message = params.get('message');
         const err = params.get('error');
 
 
-        if (err) {
-            notify(err, "error");
-        }
-        if (accessToken && message) {
+        if (err && message) {
+            notify(message, "error");
+            console.log(err);
+        } else if (message) {
             notify(message, "success");
         }
 
@@ -65,11 +63,11 @@ export default function () {
 
         try {
             dispatch(enableLoading());
-            await createUser(newUser);
+            const res = await createUser(newUser);
             reset();
             setTimeout(() => {
                 dispatch(disableLoading());
-                notify("Registration successful!", "success");
+                notify(res.data.message, "success");
             }, 2000);
         } catch (err) {
             const error = err as AxiosError;

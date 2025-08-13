@@ -11,7 +11,7 @@ export default function () {
         spinner={<BounceLoader color="#36d7b7" />}
         text="Loading..."
     >
-        <div className="@container">
+        <div className="@container h-[100vh]">
             <div className="flex p-5">
                 <div className="w-1/2 flex items-center">
                     <LeftSection />

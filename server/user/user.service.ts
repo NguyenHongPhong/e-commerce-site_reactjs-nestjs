@@ -1,13 +1,40 @@
-import { Injectable, ConflictException } from '@nestjs/common';
+import { Injectable, ConflictException, NotFoundException } from '@nestjs/common';
 import { UserRepository } from './user.repository';
 import { CreateUserDto } from './dto/create-user.dto';
 import { USER_STATUS } from '../common/constants/app.constant';
 import * as bcrypt from 'bcrypt';
+import * as jwt from 'jsonwebtoken';
+import { ConfigService } from '@nestjs/config';
+
 
 @Injectable()
 export class UserService {
     private readonly saltRounds = 10;
-    constructor(private userRepository: UserRepository) { }
+    private jwtSecret: string;
+    private jwtRefreshSecret: string;
+
+    constructor(private userRepository: UserRepository, private configService: ConfigService) {
+        this.jwtSecret = this.configService.get<string>("JWT_SECRET")!;
+        this.jwtRefreshSecret = this.configService.get<string>("JWT_REFRESH_SECRET")!;
+    }
+    generateJwt(payload: any) {
+        return jwt.sign(payload, this.jwtSecret);
+    }
+
+    verifyJwtToken(token: string) {
+        try {
+            const payload = jwt.verify(token, this.jwtSecret);
+            return payload; // { sub: userId, iat, exp }
+        } catch (err) {
+            throw new Error('Invalid token');
+        }
+    }
+
+    generateRefreshToken(payload: any) {
+        return jwt.sign(payload, this.jwtRefreshSecret, {
+            expiresIn: '7d', // Refresh token sống 7 ngày
+        });
+    }
     async hashPassword(password: string): Promise<string> {
         return bcrypt.hash(password, this.saltRounds);
     }
@@ -25,6 +52,16 @@ export class UserService {
             throw new ConflictException('Email or username already exists');
         };
 
-        return this.userRepository.createUser(defaultData);
+        const addedUser = await this.userRepository.createUser(defaultData);
+        return addedUser;
+    }
+
+    findById(id: string) {
+        const user = this.userRepository.findById(id);
+        if (user) {
+            return user;
+        } else {
+            throw new NotFoundException('Not found user');
+        }
     }
 }
