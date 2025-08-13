@@ -1,6 +1,6 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUser, faEnvelope, faEye, faPhone } from "@fortawesome/free-solid-svg-icons";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { IUserDto } from "../../types/dto/user.dto";
 import { createUser } from "../../api/user";
 import { useAppDispatch } from "../../hooks";
@@ -9,8 +9,35 @@ import { notify } from "../../utils/toast";
 import { useForm } from "react-hook-form";
 import { FormValues } from "../../types/ui";
 import { AxiosError } from 'axios';
-import { Link } from "react-router";
+import { Link, useSearchParams } from "react-router";
+import { useLocation } from 'react-router-dom';
+
+const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+const redirectUri = import.meta.env.VITE_GOOGLE_REDIRECT_URI;
+const scope = import.meta.env.VITE_GOOGLE_SCOPE;
+const authUrl = import.meta.env.VITE_GOOGLE_AUTH_URL;
+
+
 export default function () {
+    const location = useLocation();
+    const [params] = useSearchParams(location.search);
+    useEffect(() => {
+        const message = params.get('message');
+        const err = params.get('error');
+
+
+        if (err && message) {
+            notify(message, "error");
+            console.log(err);
+        } else if (message) {
+            notify(message, "success");
+        }
+
+        return window.history.replaceState({}, document.title, window.location.pathname);
+    }, [location.search])
+
+    // Inside your component, before the return statement
+    const googleAuthUrl = `${authUrl}?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=${encodeURIComponent(scope)}&response_type=code`;
 
     const {
         register,
@@ -40,10 +67,9 @@ export default function () {
             reset();
             setTimeout(() => {
                 dispatch(disableLoading());
-                notify("Registration successful!", "success");
+                notify(res.data.message, "success");
             }, 2000);
         } catch (err) {
-            reset();
             const error = err as AxiosError;
             const message = (error.response?.data as any)?.message;
             console.error("Error creating user:", message);
@@ -181,7 +207,7 @@ export default function () {
                 </button>
 
                 {/* Sign in with Gmail */}
-                <div className="w-full p-3 rounded-[10px] outline-1 outline-offset-[-1px] outline-zinc-300
+                <a href={googleAuthUrl} className="w-full p-3 rounded-[10px] outline-1 outline-offset-[-1px] outline-zinc-300
                  inline-flex flex-col justify-center items-center gap-2.5 hover:cursor-pointer">
                     <div className="inline-flex justify-start items-center gap-2.5">
                         <div className="w-6 h-6 relative overflow-hidden">
@@ -189,7 +215,7 @@ export default function () {
                         </div>
                         <div className="text-gray-900 text-lg font-medium">Sign up with Gmail</div>
                     </div>
-                </div>
+                </a>
 
                 {/* Bottom Sign In Link */}
                 <Link to={"/login"} className="flex justify-center px-10 ">

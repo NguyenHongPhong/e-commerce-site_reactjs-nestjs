@@ -3,6 +3,7 @@ import { AppModule } from './app.module';
 import * as dotenv from 'dotenv';
 import { PrismaExceptionFilter } from './common/filters/prisma-exception.filter';
 import { PrismaService } from './prisma/prisma.service';
+import cookieParser from 'cookie-parser';
 dotenv.config();
 
 async function bootstrap() {
@@ -11,6 +12,7 @@ async function bootstrap() {
         origin: process.env.CLIENT_URL,
         credentials: true,
     });
+    app.use(cookieParser());
     app.useGlobalFilters(new PrismaExceptionFilter());
     const prismaService = app.get(PrismaService);
     //close when program is ended

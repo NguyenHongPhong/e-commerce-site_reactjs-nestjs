@@ -4,10 +4,12 @@ import {
     IsEmail,
     IsBoolean,
     IsDateString,
+    IsNumber
 } from 'class-validator';
 
 export class CreateUserDto {
-    @IsString()
+    @IsNumber()
+    @IsOptional()
     status_id!: number;
 
     @IsString()
@@ -32,6 +34,14 @@ export class CreateUserDto {
     @IsOptional()
     @IsString()
     phone_number?: string;
+
+    @IsOptional()
+    @IsString()
+    providerId?: string
+
+    @IsOptional()
+    @IsString()
+    provider?: string
 
     @IsOptional()
     @IsBoolean()
