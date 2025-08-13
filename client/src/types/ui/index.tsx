@@ -25,3 +25,13 @@ export interface FormValues {
     phone_number: string;
     remember_me: boolean;
 };
+
+export interface IFormLoginValues {
+    email: string;
+    password: string;
+    remember_me: boolean;
+};
+
+export interface IFormEmail {
+    email: string;
+};

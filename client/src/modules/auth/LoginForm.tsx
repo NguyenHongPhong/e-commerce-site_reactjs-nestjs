@@ -7,7 +7,7 @@ import { useAppDispatch } from "../../hooks";
 import { disableLoading, enableLoading } from "../../reducers/loading";
 import { notify } from "../../utils/toast";
 import { useForm } from "react-hook-form";
-import { FormValues } from "../../types/ui";
+import { IFormLoginValues } from "../../types/ui";
 import { AxiosError } from 'axios';
 import { ILoginUserDto } from "../../types/dto/login-user.dto";
 import { login } from "../../api/auth";
@@ -28,12 +28,6 @@ export default function () {
         };
     }, []);
 
-    const {
-        register,
-        handleSubmit,
-        formState: { errors },
-    } = useForm<FormValues>();
-
     const handleRememberMe = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.checked) {
             localStorage.setItem('rememberMe', emailInput);
@@ -45,7 +39,14 @@ export default function () {
     };
 
 
-    const onSubmit = async (data: FormValues) => {
+    const {
+        register,
+        handleSubmit,
+        formState: { errors },
+    } = useForm<IFormLoginValues>();
+
+
+    const onSubmit = async (data: IFormLoginValues) => {
         const userLogin: ILoginUserDto = {
             password: data.password as string,
             email: data.email as string,
