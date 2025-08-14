@@ -1,7 +1,7 @@
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faEnvelope, faEye, faPhone } from "@fortawesome/free-solid-svg-icons";
-import { useEffect, useState } from "react";
+import { faEnvelope } from "@fortawesome/free-solid-svg-icons";
+import { useState } from "react";
 import { Link } from "react-router";
 import { useAppDispatch } from "../../hooks";
 import { disableLoading, enableLoading } from "../../reducers/loading";
@@ -10,16 +10,15 @@ import { useForm } from "react-hook-form";
 import { IFormEmail } from "../../types/ui";
 import { AxiosError } from 'axios';
 import { IEmail } from "../../types/dto/login-user.dto";
-import { login } from "../../api/auth";
-import { getProfile } from "../../api/user";
-import { faAngleLeft } from "@fortawesome/free-solid-svg-icons"
+import { useNavigate } from "react-router-dom";
+import { faAngleLeft } from "@fortawesome/free-solid-svg-icons";
+import { sendOTP } from "../../api/otp";
 
 
 export default function () {
-
     const [emailInput, setEmailInput] = useState<string>("");
-    const [isCheck, setIsCheck] = useState<boolean>(false);
-    const [showPassword, setShowPassword] = useState(false);
+    const dispatch = useAppDispatch();
+    const navigate = useNavigate();
 
     const {
         register,
@@ -29,25 +28,25 @@ export default function () {
 
 
     const onSubmit = async (data: IFormEmail) => {
-        const userLogin: IEmail = {
+        const recoveryEmail: IEmail = {
             email: data.email as string,
         }
 
-        // try {
-        //     dispatch(enableLoading());
-        //     const res = await login(userLogin);
-        //     setTimeout(async () => {
-        //         dispatch(disableLoading());
-        //         notify(res.data.message, "success");
-        //         await getProfile();
-        //     }, 2000);
-        // } catch (err) {
-        //     const error = err as AxiosError;
-        //     const message = (error.response?.data as any)?.message;
-        //     console.error("Error creating user:", message);
-        //     dispatch(disableLoading());
-        //     notify(message, "error");
-        // }
+        try {
+            dispatch(enableLoading());
+            const res = await sendOTP(recoveryEmail.email);
+            localStorage.setItem("time-remaining", res.data.timeRemaining);
+            setTimeout(() => {
+                dispatch(disableLoading());
+                navigate("/verify-otp");
+            }, 2000);
+        } catch (err) {
+            const error = err as AxiosError;
+            const message = (error.response?.data as any)?.message;
+            console.error("Error creating user:", message);
+            dispatch(disableLoading());
+            notify(message, "error");
+        }
     };
 
     return (

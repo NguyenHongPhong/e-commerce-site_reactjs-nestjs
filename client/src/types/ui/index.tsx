@@ -35,3 +35,12 @@ export interface IFormLoginValues {
 export interface IFormEmail {
     email: string;
 };
+
+export interface IOtpInput {
+    otp: string;
+};
+
+export interface OtpCountdownProps {
+    initialSeconds: number;
+    onExpire?: () => void;
+}

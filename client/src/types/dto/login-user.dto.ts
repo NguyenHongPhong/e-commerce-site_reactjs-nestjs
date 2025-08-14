@@ -7,3 +7,8 @@ export interface ILoginUserDto {
 export interface IEmail {
     email: string;
 }
+
+
+export interface IOtp {
+    otp: string;
+}
