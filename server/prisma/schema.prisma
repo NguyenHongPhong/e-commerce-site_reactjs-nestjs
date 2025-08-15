@@ -56,5 +56,6 @@ model Otp {
   email     String
   code      String
   expiresAt DateTime
+  isExpired Boolean  @default(false)
   createdAt DateTime @default(now())
 }

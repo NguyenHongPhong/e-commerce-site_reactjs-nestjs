@@ -1,4 +1,5 @@
 import { IconDefinition } from "@fortawesome/fontawesome-svg-core";
+import { Dispatch, SetStateAction } from "react";
 
 export interface ISideDirection {
     side: string,
@@ -43,4 +44,6 @@ export interface IOtpInput {
 export interface OtpCountdownProps {
     initialSeconds: number;
     onExpire?: () => void;
+    otpVerify: boolean;
+    reSendOtp?: Dispatch<SetStateAction<boolean>>;
 }

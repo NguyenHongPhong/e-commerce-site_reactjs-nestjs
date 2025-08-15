@@ -4,7 +4,7 @@ import { OtpController } from './otp.controller';
 import { PrismaModule } from '../prisma/prisma.module';
 import { OtpRepository } from './otp.repository';
 import { JwtModule } from '@nestjs/jwt';
-
+import { UserRepository } from '../user/user.repository';
 
 @Module({
     imports: [PrismaModule,
@@ -13,6 +13,6 @@ import { JwtModule } from '@nestjs/jwt';
         }),
     ],
     controllers: [OtpController],
-    providers: [OtpService, OtpRepository],
+    providers: [OtpService, OtpRepository, UserRepository],
 })
 export class OtpModule { }

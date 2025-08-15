@@ -36,6 +36,7 @@ export default function () {
             dispatch(enableLoading());
             const res = await sendOTP(recoveryEmail.email);
             localStorage.setItem("time-remaining", res.data.timeRemaining);
+            sessionStorage.setItem('resetFlow', res.data.flowId);
             setTimeout(() => {
                 dispatch(disableLoading());
                 navigate("/verify-otp");
