@@ -50,3 +50,11 @@ model Roles {
   id   Int    @id
   name String @unique
 }
+
+model Otp {
+  id        String   @id @default(uuid())
+  email     String
+  code      String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}

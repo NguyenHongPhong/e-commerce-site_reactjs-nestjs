@@ -6,6 +6,8 @@ import AuthLayout from "../layouts/AuthLayout";
 import LoginPage from "../pages/login";
 import RegisterPage from "../pages/register";
 import RecoveryPassword from "../pages/recovery/RecoveryPassword";
+import RecoverLayout from "../layouts/RecoverLayout";
+import VerifyOTP from "../pages/recovery/VerifyOTP";
 function AppRoutes() {
     return (
         <Routes>
@@ -17,7 +19,12 @@ function AppRoutes() {
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/register" element={<RegisterPage />} />
             </Route>
-            <Route path="/recovery-password" element={<RecoveryPassword />} />
+
+            <Route element={<RecoverLayout />}>
+                <Route path="/recovery-password" element={<RecoveryPassword />} />
+                <Route path="/verify-otp" element={<VerifyOTP />} />
+            </Route>
+
         </Routes>
     )
 }
