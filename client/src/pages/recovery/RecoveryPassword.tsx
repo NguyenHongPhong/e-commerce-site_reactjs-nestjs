@@ -35,8 +35,11 @@ export default function () {
         try {
             dispatch(enableLoading());
             const res = await sendOTP(recoveryEmail.email);
-            localStorage.setItem("time-remaining", res.data.timeRemaining);
-            sessionStorage.setItem('resetFlow', res.data.flowId);
+            sessionStorage.setItem('otpFlow', JSON.stringify({
+                flowId: res.data.flowId,
+                expiresAt: res.data.expiresAt,   // ISO string
+                serverNow: res.data.serverNow,   // ISO string (có cũng được)
+            }));
             setTimeout(() => {
                 dispatch(disableLoading());
                 navigate("/verify-otp");

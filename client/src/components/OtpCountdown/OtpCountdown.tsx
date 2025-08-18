@@ -1,32 +1,37 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { OtpCountdownProps } from "../../types/ui";
 
-const OtpCountdown: React.FC<OtpCountdownProps> = ({ initialSeconds, onExpire, otpVerify, reSendOtp }) => {
+const OtpCountdown: React.FC<OtpCountdownProps> = ({ initialSeconds, onExpire, otpVerify, reSendOtp, onNonExpire }) => {
     const [secondsLeft, setSecondsLeft] = useState(initialSeconds);
+    const firedRef = useRef(0);
 
-    // Update secondsLeft khi initialSeconds thay đổi từ parent
     useEffect(() => {
         setSecondsLeft(initialSeconds);
     }, [initialSeconds]);
 
-    // Interval countdown
     useEffect(() => {
         if (secondsLeft <= 0) return;
 
-        const interval = setInterval(() => {
-            setSecondsLeft((prev) => {
-                if (prev <= 1) {
-                    clearInterval(interval);
-                    if (onExpire) onExpire();
-                    reSendOtp?.(false);
-                    return 0;
-                }
-                return prev - 1;
-            });
+        const id = setInterval(() => {
+            setSecondsLeft(prev => (prev > 0 ? prev - 1 : 0));
         }, 1000);
 
-        return () => clearInterval(interval);
-    }, [secondsLeft, onExpire]);
+        return () => clearInterval(id);
+    }, [secondsLeft]);
+
+
+
+
+    useEffect(() => {
+        if (secondsLeft === 0) {
+            onExpire?.();
+        } else if (secondsLeft !== 0 && firedRef.current == 0) {
+            onNonExpire?.();
+        }
+
+
+
+    }, [secondsLeft, onExpire, reSendOtp]);
 
     const minutes = Math.floor(secondsLeft / 60);
     const seconds = secondsLeft % 60;

@@ -6,21 +6,16 @@ export const sendOTP = (email: string) => {
     return api.post(API_BASE + '/send', { email });
 }
 
-export const verifyOTP = (flowId: string, otp: string, numberVerifyOtp: number) => {
+export const verifyOTP = (flowId: string, otp: string) => {
     return api.post(
         API_BASE + '/verify',
-        { flowId, otp, numberVerifyOtp },
+        { flowId, otp },
         { withCredentials: true }
     );
 }
 
-export const deleteOtpHasExpired = (id: string) => {
-    return api.post(API_BASE + "/delete-otp-has-expired", { id }, { withCredentials: true }
-    );
-}
-
-export const reSendOtp = () => {
-
+export const resendOtp = (flowId: string) => {
+    return api.post(API_BASE + '/re-send', { flowId });
 }
 
 

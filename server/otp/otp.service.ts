@@ -1,22 +1,20 @@
-import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { GoneException, Injectable, NotFoundException, InternalServerErrorException } from '@nestjs/common';
 import nodemailer from 'nodemailer';
 import { ConfigService } from '@nestjs/config';
 import OtpEmailTemplate from '../common/documents/OtpEmailTemplate';
 import * as crypto from 'crypto';
 import { OtpRepository } from './otp.repository';
 import { CreateOtpDto } from './dto/create-otp';
-import { JwtService } from '@nestjs/jwt';
 import { UserRepository } from '../user/user.repository';
 
 @Injectable()
 export class OtpService {
     private transporter;
     private gmailBusiness: string;
-    private jwtSecret: string;
+    private readonly TTL_SEC = 60;      // 120s
 
     constructor(private readonly configService: ConfigService,
         private otpRepository: OtpRepository,
-        private jwtService: JwtService,
         private userRepository: UserRepository
     ) {
         this.transporter = nodemailer.createTransport({
@@ -30,18 +28,23 @@ export class OtpService {
         });
 
         this.gmailBusiness = this.configService.get<string>("GMAIL_BUSINESS")!;
-        this.jwtSecret = this.configService.get<string>("JWT_SECRET")!;
     }
 
     async generateOtp(email: string) {
+        const now = new Date();
         const code = crypto.randomInt(100000, 999999).toString();
-        const expiresAt = new Date(Date.now() + 2 * 60 * 1000); // hết hạn sau 2 phút
+        const expiresAt = new Date(now.getTime() + this.TTL_SEC * 1000); // hết hạn sau 2 phút
         const otp = new CreateOtpDto();
         otp.email = email;
         otp.code = code;
         otp.expiresAt = expiresAt;
         const addedOtp = await this.otpRepository.create(otp);
-        return { emailVerify: addedOtp.email, otp: addedOtp.code, expires: addedOtp.expiresAt, flowId: addedOtp.id };
+        await this.sendOtp(addedOtp.email, addedOtp.code, addedOtp.expiresAt);
+        return {
+            flowId: addedOtp.id,
+            expiresAt: addedOtp.expiresAt.toISOString(), // UTC ISO
+            serverNow: now.toISOString(),
+        };
     }
 
     getMinutesLeft(expiresAt: Date): number {
@@ -67,49 +70,6 @@ export class OtpService {
         }
     }
 
-    generateOtpToken(email: string, expiresInSeconds: Date) {
-        const convertExpiresInSeconds = this.getMinutesLeft(expiresInSeconds);
-        const payload = { email };
-        return {
-            otpToken: this.jwtService.sign(payload, { expiresIn: convertExpiresInSeconds + 'm' }),
-            timeRemaining: convertExpiresInSeconds
-        };
-    }
-
-    verifyToken(token: string) {
-        try {
-            const payload = this.jwtService.verify(token, { secret: this.jwtSecret });
-            return payload;
-        } catch (error) {
-            throw new UnauthorizedException('The OTP has expired.');
-        }
-    }
-
-    async authenticateOtp(payload: any, otp: string) {
-        try {
-            const isEmail = await this.otpRepository.findOtpByEmailAndCode(payload.email, otp);
-            if (isEmail) {
-                const deletedOtp = await this.otpRepository.deleteOtpById(isEmail.id);
-                return deletedOtp;
-            } else {
-                throw new UnauthorizedException('The OTP has expired.');
-            }
-        } catch (error) {
-
-        }
-    }
-
-    async deleteOtpHasExpired(id: string) {
-        try {
-            const isEmail = await this.otpRepository.findById(id);
-            if (isEmail) {
-                const updatedOtp = this.otpRepository.updateById(isEmail.id);
-                return updatedOtp;
-            }
-        } catch (error) {
-            console.log(error);
-        }
-    }
 
     async isEmailRegistered(email: string) {
         try {
@@ -122,19 +82,38 @@ export class OtpService {
         }
     }
 
-    async verifyOtp(id: string, otp: string) {
-        try {
-            const isOtpExisted = await this.otpRepository.findById(id);
-            if (isOtpExisted && !isOtpExisted.isExpired) {
-                const isOtpCorrect = await this.otpRepository.findOtpByCode(otp);
-                if (isOtpCorrect) {
-                    return isOtpCorrect;
-                }
-                throw new NotFoundException("Your OTP is incorrect.");
-            }
-            throw new NotFoundException("Your OTP is has expired.");
-        } catch (error) {
-            console.log(error);
+    async authenticateOtp(id: string, otp: string) {
+        const validOtp = await this.otpRepository.findOtpByIdAndCode(id, otp);
+
+        if (!validOtp) {
+            throw new NotFoundException("Invalid OTP");
+        };
+
+        if (validOtp) {
+            if (validOtp.expiresAt.getTime() <= Date.now()) {
+                throw new GoneException("This OTP has expired");
+            };
+        };
+
+        return { message: "Verified successfully" };
+    }
+
+    async resendOtp(flowId: string) {
+        const otp = await this.otpRepository.findById(flowId);
+        if (!otp) {
+            console.log(new NotFoundException("Not found flow id"));
+        }
+        if (otp) {
+            const recipientEmail = otp.email;
+            const { flowId, expiresAt, serverNow } = await this.generateOtp(recipientEmail);
+            await this.otpRepository.deleteOtpById(flowId);
+            return {
+                flowId: flowId,
+                expiresAt: expiresAt,
+                serverNow: serverNow,
+            };
         }
     }
+
+
 }

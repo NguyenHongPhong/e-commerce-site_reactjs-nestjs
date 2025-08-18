@@ -1,7 +1,7 @@
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faShield } from "@fortawesome/free-solid-svg-icons";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback, BaseSyntheticEvent } from "react";
 import { Link } from "react-router";
 import { useAppDispatch } from "../../hooks";
 import { disableLoading, enableLoading } from "../../reducers/loading";
@@ -12,9 +12,9 @@ import { AxiosError } from 'axios';
 import { IOtp } from "../../types/dto/login-user.dto";
 import { useNavigate } from "react-router-dom";
 import { faAngleLeft } from "@fortawesome/free-solid-svg-icons";
-import { verifyOTP } from "../../api/otp";
+import { verifyOTP, resendOtp } from "../../api/otp";
 import OtpCountdown from "../../components/OtpCountdown/OtpCountdown";
-import { deleteOtpHasExpired } from "../../api/otp";
+
 
 
 export default function () {
@@ -22,40 +22,57 @@ export default function () {
     const dispatch = useAppDispatch();
     const [timeLeft, setTimeLeft] = useState<number>(0);
     const navigate = useNavigate();
-    const numberVerifyOtp = useRef(0);
     const [disableBtnVerify, setDisableBtnVerify] = useState<boolean>();
     const [timeCountdown, setTimeCountdown] = useState<boolean>(false);
     const [disableResendOtp, setDisableResendOtp] = useState<boolean>(false);
+    const offsetRef = useRef(0);
+    const [flowId, setFlowId] = useState<string>();
 
     const handleOtpIsExpired = async () => {
-        const timeRemaining = localStorage.getItem("time-remaining");
-        if (timeRemaining) {
-            localStorage.removeItem("time-remaining");
-        };
-        try {
-            const id = sessionStorage.getItem("resetFlow")!;
-            await deleteOtpHasExpired(id);
-        } catch (error) {
-            console.log(error);
-        }
+
     }
 
-    const handleReSendOTP = () => {
-        if (numberVerifyOtp.current === 3) {
-            setDisableBtnVerify(false);
-            setTimeCountdown(false);
-        };
-        setDisableResendOtp(true);
+    const handleExpire = useCallback(() => {
+        setTimeCountdown(true);
+        setDisableBtnVerify(true);
+        setDisableResendOtp(false);
 
+    }, []);
+
+    const handleNonExpire = useCallback(() => {
+        setTimeCountdown(false);
+        setDisableBtnVerify(false);
+        setDisableResendOtp(true);
+    }, []);
+
+
+    const handleReSendOTP = () => {
+
+        setDisableBtnVerify(false);
+        setTimeCountdown(false);
+        setDisableResendOtp(true);
 
     };
 
     useEffect(() => {
-        const timeRemaining = localStorage.getItem("time-remaining");
-        if (timeRemaining) {
-            setTimeLeft((Number(timeRemaining) * 60) - 10);
+        const raw = sessionStorage.getItem('otpFlow');
+        if (raw) {
+            const { flowId, expiresAt, serverNow } = JSON.parse(raw);
+            const expiresAtMs = new Date(expiresAt).getTime();
+            const serverNowMs = new Date(serverNow).getTime();
+            const clientNowMs = Date.now();
+            offsetRef.current = clientNowMs - serverNowMs;
+
+            const leftMs = expiresAtMs - (Date.now() - offsetRef.current);
+            const initialSeconds = Math.max(0, Math.floor(leftMs / 1000));
+            setTimeLeft(initialSeconds);
+            setFlowId(flowId);
         }
+
     }, [])
+
+
+
 
     const {
         register,
@@ -63,15 +80,11 @@ export default function () {
         formState: { errors },
     } = useForm<IOtpInput>();
 
-    const onSubmit = async (data: IOtpInput) => {
+    const onSubmit = async (data: IOtpInput, e?: BaseSyntheticEvent) => {
         if (!data.otp) return;
 
-        numberVerifyOtp.current++;
-
-        if (numberVerifyOtp.current === 3) {
-            setDisableBtnVerify(true);
-            setTimeCountdown(true);
-        };
+        const submitter = (e?.nativeEvent as SubmitEvent).submitter as HTMLButtonElement | undefined;
+        const intent = submitter?.value;
 
         const otpCode: IOtp = {
             otp: data.otp as string,
@@ -79,8 +92,12 @@ export default function () {
 
         try {
             dispatch(enableLoading());
-            const flowId = sessionStorage.getItem('resetFlow');
-            const res = await verifyOTP(flowId!, otpCode.otp, numberVerifyOtp.current);
+            if (intent === "resend") {
+                //khi re-send OTP đang bắt lỗi trường email
+                return resendOtp(flowId!);
+            };
+
+            const res = await verifyOTP(flowId!, otpCode.otp);
             setTimeout(async () => {
                 dispatch(disableLoading());
                 notify(res.data.message, "success");
@@ -136,8 +153,9 @@ export default function () {
 
 
                     {/* Submit Button */}
-                    <button type="submit" className={`btn-yellow`} disabled={disableBtnVerify && disableBtnVerify}
-                        style={disableBtnVerify ? { opacity: 0.6 } : {}}
+                    <button type="submit" name="intent" className={`btn-yellow`} disabled={disableBtnVerify && disableBtnVerify}
+                        style={disableBtnVerify ? { opacity: 0.6, cursor: "default" } : {}}
+                        value="verify"
                     >
                         <div className={`text-center text-gray-900 text-lg font-medium`}>Verify</div>
                     </button>
@@ -149,10 +167,14 @@ export default function () {
                             <div className="text-zinc-400 text-lg mr-3.5">Back to</div>
                         </Link>
                         <button
-                            type="button"
+                            type="submit"
+                            name="intent"
+                            value="resend"
                             className={`text-zinc-400 text-lg mr-8 relative group
-                                ${disableResendOtp ? 'cursor-not-allowed' :
-                                    'hover:cursor-pointer'}`}>
+                                ${disableResendOtp ? 'cursor-not-allowed ' :
+                                    'hover:cursor-pointer '}`}
+                            disabled={disableResendOtp}
+                        >
                             Re-send OTP
                             <div className={`w-0 h-0 border-r-[10px] border-l-[10px] 
                             border-b-[15px] border-r-transparent border-l-transparent
@@ -173,7 +195,7 @@ export default function () {
                         </button>
                     </div>
 
-                    <OtpCountdown initialSeconds={timeLeft} onExpire={handleOtpIsExpired} otpVerify={timeCountdown} reSendOtp={setDisableResendOtp} />
+                    <OtpCountdown onNonExpire={handleNonExpire} initialSeconds={timeLeft} onExpire={handleExpire} otpVerify={timeCountdown} reSendOtp={setDisableResendOtp} />
                 </div>
             </form>
 

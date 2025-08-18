@@ -8,24 +8,16 @@ export class OtpRepository {
         return this.prismaService.otp.create({ data: otp });
     }
 
-    findOtpByEmailAndCode(email: string, code: string) {
+    findOtpByIdAndCode(id: string, code: string) {
         const otpRecord = this.prismaService.otp.findFirst({
             where: {
-                email,
-                code
+                id,
+                code,
             },
         });
         return otpRecord;
     }
 
-    findOtpByEmail(email: string) {
-        const otpRecord = this.prismaService.otp.findFirst({
-            where: {
-                email
-            },
-        });
-        return otpRecord;
-    }
 
     async deleteOtpById(id: string) {
         return await this.prismaService.otp.delete({
@@ -44,24 +36,6 @@ export class OtpRepository {
         return otpRecord;
     }
 
-    async findOtpByCode(code: string) {
-        const otpRecord = this.prismaService.otp.findFirst({
-            where: {
-                code
-            },
-        });
-        return otpRecord;
-    }
-
-    async updateById(id: string) {
-        const updatedRecord = await this.prismaService.otp.update({
-            where: { id },
-            data: {
-                isExpired: true,
-            },
-        });
-        return updatedRecord;
-    }
 
 
 }

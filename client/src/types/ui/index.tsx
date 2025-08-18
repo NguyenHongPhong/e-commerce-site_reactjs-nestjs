@@ -46,4 +46,5 @@ export interface OtpCountdownProps {
     onExpire?: () => void;
     otpVerify: boolean;
     reSendOtp?: Dispatch<SetStateAction<boolean>>;
+    onNonExpire?: () => void;
 }
