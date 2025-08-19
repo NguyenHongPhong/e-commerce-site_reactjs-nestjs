@@ -48,3 +48,9 @@ export interface OtpCountdownProps {
     reSendOtp?: Dispatch<SetStateAction<boolean>>;
     onNonExpire?: () => void;
 }
+
+
+export interface IFormResetPassword {
+    password: string;
+    confirm_password: string;
+};

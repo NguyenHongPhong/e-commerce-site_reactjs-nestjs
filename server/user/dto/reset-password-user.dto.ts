@@ -3,9 +3,9 @@ import {
     IsEmail,
 } from 'class-validator';
 
-export class ILoginUserDto {
+export class IResetPasswordUserDto {
     @IsString()
-    password!: string;
+    newPassword!: string;
 
     @IsEmail()
     email!: string;

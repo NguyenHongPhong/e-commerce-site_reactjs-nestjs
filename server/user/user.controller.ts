@@ -1,6 +1,7 @@
 import { Controller, Res, Post, Body, Get, Req } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
+import { IResetPasswordUserDto } from './dto/reset-password-user.dto';
 import { Response, Request } from 'express';
 import { IJwtPayload } from '../common/types';
 
@@ -23,6 +24,12 @@ export class UserController {
             });
 
         }
+    }
+
+
+    @Post("reset-password")
+    async resetPassword(@Body() data: IResetPasswordUserDto) {
+        return this.userService.updateNewPasswordByEmail(data);
     }
 
     @Get("me")

@@ -32,5 +32,13 @@ export class UserRepository {
         })
     }
 
+    updatePasswordByEmail(email: string, newPassword: string) {
+        return this.prisma.user.update({
+            where: { email },
+            data: {
+                password: newPassword
+            },
+        });
 
+    };
 }

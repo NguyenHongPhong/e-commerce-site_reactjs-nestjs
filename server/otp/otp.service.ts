@@ -95,22 +95,25 @@ export class OtpService {
             };
         };
 
-        return { message: "Verified successfully" };
+        const deletedOtp = await this.otpRepository.deleteOtpById(id);
+
+        return { message: "Verified successfully", gmailVerified: deletedOtp.email };
     }
 
-    async resendOtp(flowId: string) {
-        const otp = await this.otpRepository.findById(flowId);
+    async resendOtp(flowIdFromSection: string) {
+        const otp = await this.otpRepository.findById(flowIdFromSection);
         if (!otp) {
             console.log(new NotFoundException("Not found flow id"));
         }
         if (otp) {
             const recipientEmail = otp.email;
             const { flowId, expiresAt, serverNow } = await this.generateOtp(recipientEmail);
-            await this.otpRepository.deleteOtpById(flowId);
+            await this.otpRepository.deleteOtpById(flowIdFromSection);
             return {
                 flowId: flowId,
                 expiresAt: expiresAt,
                 serverNow: serverNow,
+                message: "We have just sent new OTP, check it please !!!"
             };
         }
     }

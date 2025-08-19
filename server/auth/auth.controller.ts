@@ -41,21 +41,10 @@ export class AuthController {
     }
 
     @Post('login')
-    async login(@Body() body: any, @Res() res: Response) {
+    async login(@Body() body: any) {
         const { data } = body;
         const { accessToken } = await this.authService.logIn(data.email, data.password);
-        if (accessToken) {
 
-            // Lưu refresh token vào cookie HTTP-only
-            res.cookie('accessToken', accessToken, {
-                httpOnly: true,
-                secure: process.env.NODE_ENV === 'production', // chỉ bật secure khi production
-                sameSite: 'strict',
-                maxAge: 7 * 24 * 60 * 60 * 1000 // 7 ngày
-            });
-            const message = "Login successfully !!!";
-            return res.json({ message });
-        }
     }
 
 }

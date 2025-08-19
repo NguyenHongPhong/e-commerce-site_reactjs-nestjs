@@ -1,10 +1,11 @@
-import { Injectable, ConflictException, NotFoundException } from '@nestjs/common';
+import { Injectable, ConflictException, NotFoundException, InternalServerErrorException } from '@nestjs/common';
 import { UserRepository } from './user.repository';
 import { CreateUserDto } from './dto/create-user.dto';
 import { USER_STATUS } from '../common/constants/app.constant';
 import * as bcrypt from 'bcrypt';
 import * as jwt from 'jsonwebtoken';
 import { ConfigService } from '@nestjs/config';
+import { IResetPasswordUserDto } from './dto/reset-password-user.dto';
 
 
 @Injectable()
@@ -63,5 +64,14 @@ export class UserService {
         } else {
             throw new NotFoundException('Not found user');
         }
+    }
+
+    async updateNewPasswordByEmail(data: IResetPasswordUserDto) {
+        let hashPassword = await this.hashPassword(data.newPassword);
+        const updatedUser = await this.userRepository.updatePasswordByEmail(data.email, hashPassword);
+        if (updatedUser) {
+            return { message: "Reset password success. Now you can log in !!!" };
+        }
+        throw new InternalServerErrorException("Server error !!!");
     }
 }

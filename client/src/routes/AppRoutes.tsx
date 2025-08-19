@@ -8,6 +8,8 @@ import RegisterPage from "../pages/register";
 import RecoveryPassword from "../pages/recovery/RecoveryPassword";
 import RecoverLayout from "../layouts/RecoverLayout";
 import VerifyOTP from "../pages/recovery/VerifyOTP";
+import ResetPassword from "../pages/recovery/ResetPassword";
+
 function AppRoutes() {
     return (
         <Routes>
@@ -23,6 +25,7 @@ function AppRoutes() {
             <Route element={<RecoverLayout />}>
                 <Route path="/recovery-password" element={<RecoveryPassword />} />
                 <Route path="/verify-otp" element={<VerifyOTP />} />
+                <Route path="/reset-password" element={<ResetPassword />} />
             </Route>
 
         </Routes>
