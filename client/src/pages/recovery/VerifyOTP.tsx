@@ -1,7 +1,7 @@
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faShield } from "@fortawesome/free-solid-svg-icons";
-import { useEffect, useRef, useState, useCallback, BaseSyntheticEvent } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { Link } from "react-router";
 import { useAppDispatch } from "../../hooks";
 import { disableLoading, enableLoading } from "../../reducers/loading";
@@ -25,12 +25,10 @@ export default function () {
     const [disableBtnVerify, setDisableBtnVerify] = useState<boolean>();
     const [timeCountdown, setTimeCountdown] = useState<boolean>(false);
     const [disableResendOtp, setDisableResendOtp] = useState<boolean>(false);
-    const offsetRef = useRef(0);
     const [flowId, setFlowId] = useState<string>();
-
-    const handleOtpIsExpired = async () => {
-
-    }
+    const offsetRef = useRef(0);
+    const excuteResendUseEffect = useRef(false);
+    const [resendOtpCode, setResendOtpCode] = useState<boolean>(false);
 
     const handleExpire = useCallback(() => {
         setTimeCountdown(true);
@@ -46,13 +44,53 @@ export default function () {
     }, []);
 
 
-    const handleReSendOTP = () => {
-
+    const handleReSendOTP = async () => {
         setDisableBtnVerify(false);
         setTimeCountdown(false);
-        setDisableResendOtp(true);
+        setDisableResendOtp(false);
+
+        try {
+            dispatch(enableLoading());
+            const res = await resendOtp(flowId!);
+            sessionStorage.setItem('otpFlow', JSON.stringify({
+                expiresAt: res.data.expiresAt,
+                serverNow: res.data.serverNow,
+            }));
+
+            setResendOtpCode(!resendOtpCode);
+            setFlowId(res.data.flowId);
+            setTimeout(async () => {
+                dispatch(disableLoading());
+                notify(res.data.message, "success");
+            }, 2000);
+        } catch (err) {
+            const error = err as AxiosError;
+            const message = (error.response?.data as any)?.message;
+            console.error("Error resend otp:", message);
+            dispatch(disableLoading());
+            notify(message, "error");
+        }
 
     };
+
+    useEffect(() => {
+        if (excuteResendUseEffect.current) {
+            const raw = sessionStorage.getItem('otpFlow');
+            if (raw) {
+                const { expiresAt, serverNow } = JSON.parse(raw);
+                const expiresAtMs = new Date(expiresAt).getTime();
+                const serverNowMs = new Date(serverNow).getTime();
+                const clientNowMs = Date.now();
+                offsetRef.current = clientNowMs - serverNowMs;
+
+                const leftMs = expiresAtMs - (Date.now() - offsetRef.current);
+                const initialSeconds = Math.max(0, Math.floor(leftMs / 1000));
+                setTimeLeft(initialSeconds - 1);
+                excuteResendUseEffect.current = false
+            }
+        }
+
+    }, [resendOtpCode])
 
     useEffect(() => {
         const raw = sessionStorage.getItem('otpFlow');
@@ -65,8 +103,10 @@ export default function () {
 
             const leftMs = expiresAtMs - (Date.now() - offsetRef.current);
             const initialSeconds = Math.max(0, Math.floor(leftMs / 1000));
+
             setTimeLeft(initialSeconds);
             setFlowId(flowId);
+            excuteResendUseEffect.current = true;
         }
 
     }, [])
@@ -80,11 +120,9 @@ export default function () {
         formState: { errors },
     } = useForm<IOtpInput>();
 
-    const onSubmit = async (data: IOtpInput, e?: BaseSyntheticEvent) => {
+    const onSubmit = async (data: IOtpInput) => {
         if (!data.otp) return;
 
-        const submitter = (e?.nativeEvent as SubmitEvent).submitter as HTMLButtonElement | undefined;
-        const intent = submitter?.value;
 
         const otpCode: IOtp = {
             otp: data.otp as string,
@@ -92,20 +130,20 @@ export default function () {
 
         try {
             dispatch(enableLoading());
-            if (intent === "resend") {
-                //khi re-send OTP đang bắt lỗi trường email
-                return resendOtp(flowId!);
-            };
-
             const res = await verifyOTP(flowId!, otpCode.otp);
+            sessionStorage.setItem("gmail-verified", res.data.gmailVerified);
+            sessionStorage.removeItem("otpFlow");
             setTimeout(async () => {
                 dispatch(disableLoading());
                 notify(res.data.message, "success");
             }, 2000);
+            setTimeout(() => {
+                navigate("/reset-password");
+            }, 2100);
         } catch (err) {
             const error = err as AxiosError;
             const message = (error.response?.data as any)?.message;
-            console.error("Error creating user:", message);
+            console.error("Error verify otp:", message);
             dispatch(disableLoading());
             notify(message, "error");
         }
@@ -153,7 +191,7 @@ export default function () {
 
 
                     {/* Submit Button */}
-                    <button type="submit" name="intent" className={`btn-yellow`} disabled={disableBtnVerify && disableBtnVerify}
+                    <button type="submit" className={`btn-yellow`} disabled={disableBtnVerify && disableBtnVerify}
                         style={disableBtnVerify ? { opacity: 0.6, cursor: "default" } : {}}
                         value="verify"
                     >
@@ -167,13 +205,12 @@ export default function () {
                             <div className="text-zinc-400 text-lg mr-3.5">Back to</div>
                         </Link>
                         <button
-                            type="submit"
-                            name="intent"
-                            value="resend"
+                            type="button"
                             className={`text-zinc-400 text-lg mr-8 relative group
                                 ${disableResendOtp ? 'cursor-not-allowed ' :
                                     'hover:cursor-pointer '}`}
                             disabled={disableResendOtp}
+                            onClick={handleReSendOTP}
                         >
                             Re-send OTP
                             <div className={`w-0 h-0 border-r-[10px] border-l-[10px] 

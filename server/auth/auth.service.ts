@@ -1,7 +1,7 @@
 import { Injectable, HttpException, HttpStatus, UnauthorizedException, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import axios from 'axios';
-import * as jwt from 'jsonwebtoken';
+import { JwtService } from '@nestjs/jwt';
 import { OAuth2Client } from 'google-auth-library';
 import { UserRepository } from '../user/user.repository';
 import { CreateUserDto } from '../user/dto/create-user.dto';
@@ -16,16 +16,13 @@ export class AuthService {
     private clientSecret: string;
     private redirectUri: string;
     private oauth2Client: OAuth2Client;
-    private jwtSecret: string;
-    private jwtRefreshSecret: string;
 
-    constructor(private configService: ConfigService, private authRepository: AuthRepository, private readonly userRepository: UserRepository) {
+    constructor(private configService: ConfigService, private authRepository: AuthRepository,
+        private readonly userRepository: UserRepository, private jwtService: JwtService,) {
         this.clientId = this.configService.get<string>('GOOGLE_CLIENT_ID')!;
         this.clientSecret = this.configService.get<string>('GOOGLE_CLIENT_SECRET')!;
         this.redirectUri = this.configService.get<string>('GOOGLE_REDIRECT_URI')!;
         this.oauth2Client = new OAuth2Client(this.clientId, this.clientSecret, this.redirectUri);
-        this.jwtSecret = this.configService.get<string>('JWT_SECRET')!;
-        this.jwtRefreshSecret = this.configService.get<string>('JWT_REFRESH_SECRET')!;
     }
 
     // Gửi request đổi code lấy token từ Google
@@ -65,15 +62,6 @@ export class AuthService {
         }
     }
 
-    generateJwt(payload: any) {
-        return jwt.sign(payload, this.jwtSecret);
-    }
-
-    generateRefreshToken(payload: any) {
-        return jwt.sign(payload, this.jwtRefreshSecret, {
-            expiresIn: '7d', // Refresh token sống 7 ngày
-        });
-    }
     // Hàm tổng hợp lấy token và giải mã user info
     async loginWithGoogle(code: string) {
 
@@ -114,36 +102,22 @@ export class AuthService {
         return bcrypt.compare(password, hashedPassword);
     }
 
-    async logIn(email: string, password: string) {
-        const now = Math.floor(Date.now() / 1000);
-        const isUserExisted = await this.authRepository.findByField("email", email);
-        if (isUserExisted) {
-            const isCorrectPassword = await this.comparePassword(password, isUserExisted.password);
-            if (isCorrectPassword) {
-                const accessToken = this.generateJwt({
-                    sub: isUserExisted.id,       // Subject - ID của user trong DB của bạn, định danh duy nhất người sở hữu token
-                    iss: "e-commerce",         // Issuer - ai phát hành token này (ở đây là hệ thống e-commerce của bạn)
-                    aud: this.clientId,        // Audience - ai được phép sử dụng token (thường là clientId hoặc tên ứng dụng)
-                    iat: now,                  // Issued At - thời điểm token được phát hành (timestamp, tính bằng giây)
-                    exp: now + 60 * 60,        // Expiration Time - thời điểm token hết hạn (ở đây là sau 1 giờ)
-                    nbf: now,                   // Not Before - nếu gọi và xử lý trước thời điểm này...token sẽ không hợp lệ (ở đây là hợp lệ ngay lập tức)
-                    email: isUserExisted.email,
-                    role: ROLES.customer,
-                });
-
-                const refreshToken = this.generateRefreshToken({
-                    sub: isUserExisted.id,
-                    iss: "e-commerce",
-                    aud: this.clientId,
-                    iat: now,
-                });
-
-                return { accessToken };
-            } else {
-                throw new UnauthorizedException('Invalid password');
-            }
-        } else {
-            throw new NotFoundException('User not found');
+    async validateUser(email: string, password: string): Promise<any> {
+        const user = await this.userRepository.findByEmail(email);
+        if (user && await this.comparePassword(password, user.password)) {
+            const { password, ...result } = user;
+            return result;
         }
+        return null;
+    }
+
+    async logIn(user: any) {
+        const accessToken = await this.jwtService.signAsync({
+            sub: user.id,       // Subject - ID của user trong DB của bạn, định danh duy nhất người sở hữu token
+            iss: "e-commerce",         // Issuer - ai phát hành token này (ở đây là hệ thống e-commerce của bạn)
+            role: ROLES.customer,
+        });
+
+        return { message: "Log in success.", accessToken: accessToken };
     }
 }

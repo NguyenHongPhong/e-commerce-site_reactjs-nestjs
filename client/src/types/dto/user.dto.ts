@@ -13,3 +13,8 @@ export interface IUserDto {
     provider?: string,
     providerId?: string
 }
+
+export interface IUserResetPassword {
+    email: string,
+    newPassword: string
+}
