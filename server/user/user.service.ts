@@ -74,4 +74,14 @@ export class UserService {
         }
         throw new InternalServerErrorException("Server error !!!");
     }
+
+    async getProfile(id: string) {
+        const user = await this.userRepository.findById(id);
+        if (!user) {
+            throw new NotFoundException("Not found profile");
+        }
+
+        const { password, providerId, updated_at, ...result } = user;
+        return result;
+    }
 }

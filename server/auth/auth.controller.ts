@@ -1,8 +1,10 @@
-import { Controller, Get, Res, Body, HttpException, HttpStatus, Query, Post } from '@nestjs/common';
+import { Controller, Get, Res, HttpException, HttpStatus, Query, Post, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { Response } from 'express';
 import { AxiosError } from 'axios';
 import { ConfigService } from '@nestjs/config';
+import { LocalAuthGuard } from './guards/local-auth.guard';
+import { CurrentUser } from '../common/types/currentUser';
 
 
 
@@ -40,11 +42,11 @@ export class AuthController {
 
     }
 
+    //Route xử lý login sử dụng guard để valid user
+    @UseGuards(LocalAuthGuard)
     @Post('login')
-    async login(@Body() body: any) {
-        const { data } = body;
-        const { accessToken } = await this.authService.logIn(data.email, data.password);
-
-    }
+    async login(@CurrentUser() user: any) {
+        return this.authService.logIn(user);
+    };
 
 }
