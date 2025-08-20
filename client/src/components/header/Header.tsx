@@ -14,11 +14,16 @@ function Header() {
                     <Link to="/about">About</Link>
                     <Link to="/contact">Contact</Link>
                 </nav>
-                <div className="flex items-center grow justify-end">
+                {/* <div className="flex items-center grow justify-end">
                     <Link to="/login" className="mr-5 text-gray-900 text-base font-semibold font-['Plus_Jakarta_Sans'] leading-7">Log in</Link>
                     <Link to="/register" className="w-28 h-12 bg-gray-900 rounded-md flex justify-center items-center hover:opacity-85">
                         <span className="text-white">Sign up</span>
                     </Link>
+                </div> */}
+
+                <div className="flex grow items-center justify-end">
+                    <img className="w-10 h-10 rounded-full mr-5" src={`/public/ui/images/slider-banner/banner-1.jpg`} alt="" />
+                    <span >Username</span>
                 </div>
             </div>
         </div>

@@ -55,15 +55,18 @@ export default function () {
         try {
             dispatch(enableLoading());
             const res = await login(userLogin);
+            sessionStorage.setItem("accessToken", res.data.accessToken);
+            const userInformation = await getProfile(res.data.accessToken);
+            console.log(userInformation);
             setTimeout(async () => {
                 dispatch(disableLoading());
                 notify(res.data.message, "success");
-                await getProfile();
             }, 2000);
         } catch (err) {
             const error = err as AxiosError;
             const message = (error.response?.data as any)?.message;
-            console.error("Error creating user:", message);
+
+            console.error("Error log in:", message);
             dispatch(disableLoading());
             notify(message, "error");
         }
