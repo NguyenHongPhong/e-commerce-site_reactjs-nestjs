@@ -11,7 +11,6 @@ import { LocalStrategy } from './strategies/localStrategy';
     imports: [PrismaModule,
         JwtModule.register({
             secret: process.env.JWT_SECRET, //key secret để tạo token
-            signOptions: { expiresIn: '15m' }, // access token hết hạn sau 15 phút
         }),
     ],
     controllers: [AuthController],

@@ -8,11 +8,8 @@ export const createUser = (data: IUserDto) => {
     return api.post(API_BASE, data);
 };
 
-export const getProfile = (accessToken: string) =>
+export const getProfile = () =>
     api.get(API_BASE + '/profile', {
-        headers: {
-            Authorization: `Bearer ${accessToken}`
-        }
     });
 
 export const resetPassword = (data: IUserResetPassword) => {

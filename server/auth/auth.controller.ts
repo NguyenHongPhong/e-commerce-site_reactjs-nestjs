@@ -5,12 +5,13 @@ import { AxiosError } from 'axios';
 import { ConfigService } from '@nestjs/config';
 import { LocalAuthGuard } from './guards/local-auth.guard';
 import { CurrentUser } from '../common/types/currentUser';
-
+import { ACCESS_TOKEN_COOKIE, REFRESH_TOKEN_COOKIE, accessTokenCookieOptions, refreshTokenCookieOptions } from './constants/cookie.constants';
 
 
 @Controller('auth')
 export class AuthController {
     private clientUrl: string;
+
     constructor(
         private readonly authService: AuthService,
         private configService: ConfigService
@@ -45,8 +46,13 @@ export class AuthController {
     //Route xử lý login sử dụng guard để valid user
     @UseGuards(LocalAuthGuard)
     @Post('login')
-    async login(@CurrentUser() user: any) {
-        return this.authService.logIn(user);
+    async login(@CurrentUser() user: any, @Res({ passthrough: true }) res: Response) {
+        const { accessToken, refreshToken, expiresIn, serverNow } = await this.authService.logIn(user);
+
+        res.cookie(ACCESS_TOKEN_COOKIE, accessToken, accessTokenCookieOptions);
+        res.cookie(REFRESH_TOKEN_COOKIE, refreshToken, refreshTokenCookieOptions);
+
+        return { ok: true, message: "Log in success.", expiresIn, serverNow };
     };
 
 }
