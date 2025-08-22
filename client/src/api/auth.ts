@@ -6,4 +6,7 @@ export const login = (data: ILoginUserDto) => {
     return api.post(API_BASE + '/login', data);
 }
 
+export const refreshToken = () => {
+    return api.post(API_BASE + "/refresh", {});
+}
 

@@ -19,18 +19,18 @@ export interface IUserResetPassword {
     newPassword: string
 }
 
-export interface IDataUserDto {
-    created_at: Date,
-    email: string,
-    email_verified_at: boolean,
-    first_name: string,
-    id: string,
-    isShop: boolean,
-    last_login_at: Date,
-    last_name: string,
-    phone_number: string,
-    portrait: string,
-    provider: string,
-    status_id: number,
-    username: string
-}
+
+export interface IProfileUserDto {
+    id: string;
+    status_id: number;
+    username: string;
+    first_name: string;
+    last_name: string;
+    email: string;
+    portrait: string | null;
+    phone_number: string | null;
+    isShop: boolean;
+    email_verified_at: boolean;
+    provider: string | null;
+    created_at: Date;
+};

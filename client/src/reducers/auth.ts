@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { IDataUserDto } from "../types/dto/user.dto";
+import { IProfileUserDto } from "../types/dto/user.dto";
 export interface AuthState {
-    user: IDataUserDto | null;
+    user: IProfileUserDto | null;
     status?: string;
 }
 const initialState: AuthState = { user: null, status: "" };

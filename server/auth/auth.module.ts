@@ -7,6 +7,8 @@ import { UserRepository } from '../user/user.repository';
 import { JwtModule } from '@nestjs/jwt';
 import { LocalAuthGuard } from './guards/local-auth.guard';
 import { LocalStrategy } from './strategies/localStrategy';
+import { RefreshJwtStrategy } from './strategies/refreshJwtStrategy';
+import { RefreshJwtGuard } from './guards/refresh-jwt.guard';
 @Module({
     imports: [PrismaModule,
         JwtModule.register({
@@ -14,7 +16,10 @@ import { LocalStrategy } from './strategies/localStrategy';
         }),
     ],
     controllers: [AuthController],
-    providers: [AuthService, AuthRepository, UserRepository, LocalAuthGuard, LocalStrategy],
+    providers: [AuthService, AuthRepository, UserRepository,
+        LocalAuthGuard, LocalStrategy,
+        RefreshJwtStrategy, RefreshJwtGuard
+    ],
     exports: []
 })
 export class AuthModule { }

@@ -81,7 +81,9 @@ export class UserService {
             throw new NotFoundException("Not found profile");
         }
 
-        const { password, providerId, updated_at, ...result } = user;
+        await this.userRepository.updateByField(user.id, new Date(), "id", "last_login_at");
+
+        const { password, providerId, updated_at, last_login_at, ...result } = user;
         return result;
     }
 }

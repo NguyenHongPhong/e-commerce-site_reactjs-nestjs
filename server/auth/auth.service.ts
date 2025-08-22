@@ -125,6 +125,7 @@ export class AuthService {
             sub: user.id,
             role: ROLES.customer,
         }, {
+            secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
             expiresIn: this.REFRESH_TTL,
         });
 
@@ -134,5 +135,40 @@ export class AuthService {
         const expires_in = Math.max(0, exp - server_now); //số giây còn lại
 
         return { accessToken: accessToken, refreshToken: refreshToken, expiresIn: expires_in, serverNow: server_now };
+    }
+
+    async rotate(id: string) {
+        let accessToken;
+        let refreshToken;
+        let data;
+        let expires_in;
+        let server_now;
+        const user = await this.authRepository.findByField("id", id);
+        if (!user) {
+            throw new UnauthorizedException("Unauthorized !!!!")
+        }
+        if (user) {
+            accessToken = await this.jwtService.signAsync({
+                sub: user.id,       // Subject - ID của user trong DB của bạn, định danh duy nhất người sở hữu token
+                iss: "e-commerce",         // Issuer - ai phát hành token này (ở đây là hệ thống e-commerce của bạn)
+                role: ROLES.customer,
+            }, { expiresIn: this.ACCESS_TTL });
+
+            refreshToken = await this.jwtService.signAsync({
+                sub: user.id,
+                role: ROLES.customer,
+            }, {
+                secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
+                expiresIn: this.REFRESH_TTL,
+            });
+            const { password, providerId, updated_at, created_at, ...result } = user;
+            const decoded: any = this.jwtService.decode(accessToken);
+            const exp = decoded?.exp as number;
+            data = result;
+            server_now = Math.floor(Date.now() / 1000);
+            expires_in = Math.max(0, exp - server_now); //số giây còn lại
+        }
+
+        return { newAccessToken: accessToken, newRefreshToken: refreshToken, userInfo: data, expiresIn: expires_in, serverNow: server_now };
     }
 }

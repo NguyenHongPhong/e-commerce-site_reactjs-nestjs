@@ -1,4 +1,4 @@
-import { Controller, Get, Res, HttpException, HttpStatus, Query, Post, UseGuards } from '@nestjs/common';
+import { Controller, Get, Res, Req, HttpException, HttpStatus, Query, Post, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { Response } from 'express';
 import { AxiosError } from 'axios';
@@ -6,7 +6,7 @@ import { ConfigService } from '@nestjs/config';
 import { LocalAuthGuard } from './guards/local-auth.guard';
 import { CurrentUser } from '../common/types/currentUser';
 import { ACCESS_TOKEN_COOKIE, REFRESH_TOKEN_COOKIE, accessTokenCookieOptions, refreshTokenCookieOptions } from './constants/cookie.constants';
-
+import { RefreshJwtGuard } from './guards/refresh-jwt.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -54,5 +54,16 @@ export class AuthController {
 
         return { ok: true, message: "Log in success.", expiresIn, serverNow };
     };
+
+
+    @UseGuards(RefreshJwtGuard)
+    @Post('refresh')
+    async refresh(@CurrentUser() user: any, @Res({ passthrough: true }) res: Response) {
+        const { newAccessToken, newRefreshToken, userInfo, expiresIn, serverNow } = await this.authService.rotate(user.id);
+        res.cookie(ACCESS_TOKEN_COOKIE, newAccessToken, accessTokenCookieOptions);
+        res.cookie(REFRESH_TOKEN_COOKIE, newRefreshToken, refreshTokenCookieOptions);
+        return { ok: true, user: userInfo, expiresIn, serverNow };
+    }
+
 
 }
