@@ -9,16 +9,20 @@ import { LocalAuthGuard } from './guards/local-auth.guard';
 import { LocalStrategy } from './strategies/localStrategy';
 import { RefreshJwtStrategy } from './strategies/refreshJwtStrategy';
 import { RefreshJwtGuard } from './guards/refresh-jwt.guard';
+import { RefreshJwtExpiredGuard } from './guards/refresh-jwt-expired.guard';
+import { PassportModule } from '@nestjs/passport';
 @Module({
     imports: [PrismaModule,
         JwtModule.register({
             secret: process.env.JWT_SECRET, //key secret để tạo token
         }),
+        PassportModule.register({ defaultStrategy: 'jwt' })
     ],
     controllers: [AuthController],
     providers: [AuthService, AuthRepository, UserRepository,
         LocalAuthGuard, LocalStrategy,
-        RefreshJwtStrategy, RefreshJwtGuard
+        RefreshJwtStrategy, RefreshJwtGuard,
+        RefreshJwtExpiredGuard
     ],
     exports: []
 })

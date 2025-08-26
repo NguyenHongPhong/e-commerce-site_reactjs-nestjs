@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEnvelope, faEye } from "@fortawesome/free-solid-svg-icons";
 import { useEffect, useState } from "react";
 import { Link } from "react-router";
-import { useAppDispatch } from "../../hooks";
+import { useAppDispatch, useAppSelector } from "../../hooks";
 import { disableLoading, enableLoading } from "../../reducers/loading";
 import { notify } from "../../utils/toast";
 import { useForm } from "react-hook-form";
@@ -12,7 +12,6 @@ import { AxiosError } from 'axios';
 import { ILoginUserDto } from "../../types/dto/login-user.dto";
 import { login } from "../../api/auth";
 import { useNavigate } from "react-router-dom";
-
 
 export default function () {
     const [emailInput, setEmailInput] = useState<string>("");
@@ -59,6 +58,8 @@ export default function () {
             sessionStorage.setItem("time-ending", JSON.stringify(
                 { expiresIn: res.data.expiresIn, serverNow: res.data.serverNow }
             ));
+            console.log({ expiresIn: res.data.expiresIn, serverNow: res.data.serverNow });
+
             setTimeout(async () => {
                 dispatch(disableLoading());
                 notify(res.data.message, "success");

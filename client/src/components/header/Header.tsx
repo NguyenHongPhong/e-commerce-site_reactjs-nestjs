@@ -8,13 +8,18 @@ import { faCaretDown } from "@fortawesome/free-solid-svg-icons"
 import { useSessionExpiryCountdown } from "../../features/auth/hooks/useSessionExpiryCountdown";
 import { refreshToken } from "../../api/auth";
 import { IProfileUserDto } from "../../types/dto/user.dto";
+import { notify } from "../../utils/toast";
+import { useNavigate } from "react-router-dom";
+import type { AxiosError } from "axios";
+import { ErrorResponse } from "../../types/ui";
 
 function Header() {
-    const { secondsLeft, isExpired } = useSessionExpiryCountdown("time-ending");
+    const { secondsLeft, isExpired, timeUp } = useSessionExpiryCountdown("time-ending");
     const dispatch = useAppDispatch();
     const user = useAppSelector((s) => s.auth.user);
     const status = useAppSelector((s) => s.auth.status);
     const [profile, setProfile] = useState<IProfileUserDto>();
+    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchProfile = async () => {
@@ -33,30 +38,49 @@ function Header() {
 
     useEffect(() => {
         if (!isExpired) return;
-        console.log("Time's up");
+        if (timeUp) {
+            setTimeout(() => {
+                const fetchProfileAsTokenExpired = async () => {
+                    try {
+                        const res = await getProfile();
+                    } catch (e: any) {
+                        const err = e as AxiosError;
+                        const status = err?.response?.status;
 
-        const fetchProfileAsTokenExpired = async () => {
-            try {
-                await getProfile();
-            } catch (err: any) {
-                console.error(err);
-                if (err.response.status === 401) {
-                    const result = await refreshToken();
-                    console.log(result.data);
-                    sessionStorage.setItem("time-ending", JSON.stringify(
-                        { expiresIn: result.data.expiresIn - 1, serverNow: result.data.serverNow }
-                    ));
-                    //Mỗi lần refresh thời gian sẽ luôn được lắp lại vậy nên component 
-                    //con sẽ nhận thời gian expire giống nhau và khi child component 
-                    //nhận được tham số giống nhau nó sẽ không thể re-render lại chính nó
-                    const res = await getProfile();
-                    const user = res.data;
-                    setProfile(user);
-                }
+                        if (status !== 401) {
+                            return;
+                        }
+                    }
 
-            }
-        };
-        fetchProfileAsTokenExpired();
+                    try {
+                        const result = await refreshToken();
+                        const newTimer = { expiresIn: result.data.expiresIn, serverNow: result.data.serverNow };
+                        sessionStorage.setItem("time-ending", JSON.stringify(
+                            newTimer
+                        ));
+
+                        window.dispatchEvent(new CustomEvent("token:updated", { detail: newTimer }));
+                        const res = await getProfile();
+                        const user = res.data;
+                        setProfile(user);
+                    } catch (e) {
+                        const err = e as AxiosError<ErrorResponse>;
+                        const status = err?.response?.status;
+                        // Treat 401/403/410 as “must re-login”
+                        if (status === 401 || status === 403 || status === 410) {
+                            sessionStorage.removeItem("time-ending");
+                            console.log(err);
+                            setTimeout(() => {
+                                navigate("/login");
+                            }, 5000);
+                            return;
+                        }
+                    }
+                };
+                fetchProfileAsTokenExpired();
+            }, 2000);
+        }
+
     }, [isExpired]);
 
     console.log(secondsLeft);

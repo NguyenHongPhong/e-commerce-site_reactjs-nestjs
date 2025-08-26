@@ -17,7 +17,7 @@ export class AuthService {
     private redirectUri: string;
     private oauth2Client: OAuth2Client;
     private readonly ACCESS_TTL = 60 * 1;        // 5 phút (giây)
-    private readonly REFRESH_TTL = 60 * 60 * 24 * 7; // 7 ngày (giây)
+    private readonly REFRESH_TTL = 60; // 7 ngày (giây)
 
     constructor(private configService: ConfigService, private authRepository: AuthRepository,
         private readonly userRepository: UserRepository, private jwtService: JwtService,) {
@@ -118,7 +118,7 @@ export class AuthService {
             sub: user.id,       // Subject - ID của user trong DB của bạn, định danh duy nhất người sở hữu token
             iss: "e-commerce",         // Issuer - ai phát hành token này (ở đây là hệ thống e-commerce của bạn)
             role: ROLES.customer,
-        }, { expiresIn: this.ACCESS_TTL });
+        }, { expiresIn: this.ACCESS_TTL + 's' });
 
         // refreshToken (dài hạn, dùng để cấp lại accessToken)
         const refreshToken = await this.jwtService.signAsync({
@@ -126,7 +126,7 @@ export class AuthService {
             role: ROLES.customer,
         }, {
             secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
-            expiresIn: this.REFRESH_TTL,
+            expiresIn: '70s',
         });
 
         const server_now = Math.floor(Date.now() / 1000);

@@ -14,5 +14,5 @@ export const refreshTokenCookieOptions = {
     secure: true,
     sameSite: 'lax' as const,
     path: '/auth',           // chỉ gửi khi gọi /auth/*
-    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 ngày
+    maxAge: 1 * 24 * 60 * 60 * 1000, // 7 ngày
 };

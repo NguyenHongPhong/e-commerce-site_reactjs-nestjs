@@ -6,7 +6,7 @@ import { ConfigService } from '@nestjs/config';
 import { LocalAuthGuard } from './guards/local-auth.guard';
 import { CurrentUser } from '../common/types/currentUser';
 import { ACCESS_TOKEN_COOKIE, REFRESH_TOKEN_COOKIE, accessTokenCookieOptions, refreshTokenCookieOptions } from './constants/cookie.constants';
-import { RefreshJwtGuard } from './guards/refresh-jwt.guard';
+import { RefreshJwtExpiredGuard } from './guards/refresh-jwt-expired.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -56,7 +56,7 @@ export class AuthController {
     };
 
 
-    @UseGuards(RefreshJwtGuard)
+    @UseGuards(RefreshJwtExpiredGuard)
     @Post('refresh')
     async refresh(@CurrentUser() user: any, @Res({ passthrough: true }) res: Response) {
         const { newAccessToken, newRefreshToken, userInfo, expiresIn, serverNow } = await this.authService.rotate(user.id);
