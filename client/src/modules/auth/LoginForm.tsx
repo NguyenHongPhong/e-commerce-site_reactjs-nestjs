@@ -58,7 +58,6 @@ export default function () {
             sessionStorage.setItem("time-ending", JSON.stringify(
                 { expiresIn: res.data.expiresIn, serverNow: res.data.serverNow }
             ));
-            console.log({ expiresIn: res.data.expiresIn, serverNow: res.data.serverNow });
 
             setTimeout(async () => {
                 dispatch(disableLoading());

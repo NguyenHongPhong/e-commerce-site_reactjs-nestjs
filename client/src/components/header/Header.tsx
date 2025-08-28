@@ -8,7 +8,7 @@ import { faCaretDown } from "@fortawesome/free-solid-svg-icons"
 import { useSessionExpiryCountdown } from "../../features/auth/hooks/useSessionExpiryCountdown";
 import { refreshToken } from "../../api/auth";
 import { IProfileUserDto } from "../../types/dto/user.dto";
-import { notify } from "../../utils/toast";
+import { useIdle } from "../../features/ui/hooks/useIdle";
 import { useNavigate } from "react-router-dom";
 import type { AxiosError } from "axios";
 import { ErrorResponse } from "../../types/ui";
@@ -20,7 +20,13 @@ function Header() {
     const status = useAppSelector((s) => s.auth.status);
     const [profile, setProfile] = useState<IProfileUserDto>();
     const navigate = useNavigate();
-
+    const [idle, setIdle] = useState(0);
+    const isIdle = useIdle(idle);
+    console.log(secondsLeft);
+    
+    
+    
+    //call api to get profile
     useEffect(() => {
         const fetchProfile = async () => {
             try {
@@ -36,9 +42,28 @@ function Header() {
         fetchProfile();
     }, []);
 
+    //assign data to store redux then could access in multiple pages
+    useEffect(() => {
+        if (profile) {
+            dispatch(authenticated({ user: profile }));
+        };
+    }, [profile]);
+
+    //Caculating expire time to check if user is inactive
+    useEffect(()=> {
+        const expiresIn = sessionStorage.getItem("time-ending");
+        if(expiresIn) {
+                const convertData = JSON.parse(expiresIn);
+                const rs = ((convertData.expiresIn ?? 0) * 1000)-5000;
+                setIdle(rs);
+        }
+                    
+    }, []);
+
+    //Call API when accessToken expired
     useEffect(() => {
         if (!isExpired) return;
-        if (timeUp) {
+        if (timeUp && !isIdle) {
             setTimeout(() => {
                 const fetchProfileAsTokenExpired = async () => {
                     try {
@@ -60,6 +85,7 @@ function Header() {
                         ));
 
                         window.dispatchEvent(new CustomEvent("token:updated", { detail: newTimer }));
+
                         const res = await getProfile();
                         const user = res.data;
                         setProfile(user);
@@ -80,16 +106,12 @@ function Header() {
                 fetchProfileAsTokenExpired();
             }, 2000);
         }
+    }, [isExpired, isIdle]);
+    
+    useEffect(()=> {
 
-    }, [isExpired]);
+    }, [isIdle])
 
-    console.log(secondsLeft);
-
-    useEffect(() => {
-        if (profile) {
-            dispatch(authenticated({ user: profile }));
-        };
-    }, [profile])
 
 
     return (<header>

@@ -126,7 +126,7 @@ export class AuthService {
             role: ROLES.customer,
         }, {
             secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
-            expiresIn: '70s',
+            expiresIn: '1h',
         });
 
         const server_now = Math.floor(Date.now() / 1000);
