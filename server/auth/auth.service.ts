@@ -159,7 +159,7 @@ export class AuthService {
                 role: ROLES.customer,
             }, {
                 secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
-                expiresIn: this.REFRESH_TTL,
+                expiresIn: '1h',
             });
             const { password, providerId, updated_at, created_at, ...result } = user;
             const decoded: any = this.jwtService.decode(accessToken);

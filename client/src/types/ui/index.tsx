@@ -69,4 +69,13 @@ export type ErrorResponse = {
     code?: string;
 };
 
+export interface ICategoryItem {
+    id: number;
+    name: string,
+    slug: string,
+    url: string
+}
 
+export type  Props = {
+  children: React.ReactNode;
+};

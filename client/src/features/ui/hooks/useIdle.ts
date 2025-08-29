@@ -8,19 +8,15 @@ export function useIdle(timeout: number) {
   const resetAction = useCallback(() => {
     setIdle(false);
 
-    if (timerId.current) {
-      clearTimeout(timerId.current);
-    }
+    if (timerId.current) clearTimeout(timerId.current);
 
-    timerId.current = window.setTimeout(() => {
-        console.log("SAD THU");
-        
+    timerId.current = window.setTimeout(() => { 
       setIdle(true);
     }, timeout);
   }, [timeout]);
 
   useEffect(() => {
-    const events = [ "mousedown", "keydown", "scroll", "touchstart"];
+    const events = [ "mousemove","mousedown", "keydown", "scroll", "touchstart"];
 
     // start first timer
     resetAction();
@@ -35,6 +31,5 @@ export function useIdle(timeout: number) {
     
 }, [resetAction]);
 
-console.log(isIdle);
   return isIdle;
 }

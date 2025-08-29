@@ -22,9 +22,7 @@ function Header() {
     const navigate = useNavigate();
     const [idle, setIdle] = useState(0);
     const isIdle = useIdle(idle);
-    console.log(secondsLeft);
-    
-    
+    const [showPrompt, setShowPrompt] = useState(false);
     
     //call api to get profile
     useEffect(() => {
@@ -109,7 +107,9 @@ function Header() {
     }, [isExpired, isIdle]);
     
     useEffect(()=> {
-
+        if(isIdle) {
+           console.log("User is inactive");
+        }
     }, [isIdle])
 
 

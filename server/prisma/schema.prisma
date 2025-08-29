@@ -58,3 +58,21 @@ model Otp {
   expiresAt DateTime
   createdAt DateTime @default(now())
 }
+
+model Category {
+  id          Int      @id @default(autoincrement())
+  name        String
+  slug        String
+  description String?
+  parent_id   Int?
+  is_active   Boolean
+  updatedAt   DateTime
+  createAt    DateTime
+}
+
+model Category_images {
+  id          Int    @id @default(autoincrement())
+  category_id Int
+  url         String
+  main        Boolean   @default(false)
+}
