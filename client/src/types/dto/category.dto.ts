@@ -2,7 +2,7 @@ export type CategoryFormData = {
     name: string;
     description: string;
     images: FileList; // input type file
-    parent_id: number
+    parent_id: string
 };
 
 export type CategoryOption = {
@@ -10,15 +10,25 @@ export type CategoryOption = {
     name: string;
 };
 
-export interface ICategoryDto {
-    name: string;
-    description: string;
-    images: FileList;
-    parent_id: number
-}
-
 export interface IFormData {
     name: string,
     description: string,
-    files: File[]
+    parentId?: string,
+    images: File[]
+}
+
+export function toFormData(dto: IFormData): FormData {
+    const formData = new FormData();
+
+    formData.append("name", dto.name);
+    formData.append("description", dto.description);
+
+    if (dto.parentId) {
+        formData.append("parentId", dto.parentId);
+    }
+
+    dto.images.forEach((file) => {
+        formData.append("images", file);
+    });
+    return formData;
 }

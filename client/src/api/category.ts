@@ -1,5 +1,9 @@
 import api from ".";
-import { IFormData } from "@uiTypes/dto/category.dto";
-const API_BASE = '/category';
+import { IFormData, toFormData } from "@uiTypes/dto/category.dto";
+const API_BASE = '/categories';
 
-export const createCategory = (data: IFormData) => api.post(API_BASE + '/create', data);
+export const createCategory = (data: IFormData) => {
+    return api.post(API_BASE + '/create', toFormData(data), {
+        headers: { "Content-Type": "multipart/form-data" }
+    });
+}

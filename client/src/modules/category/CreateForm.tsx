@@ -1,8 +1,8 @@
 import { useForm } from "react-hook-form";
 import { useState, useEffect } from "react";
 import { CategoryFormData, CategoryOption } from "@uiTypes/dto/category.dto";
-
-
+import { IFormData } from "@uiTypes/dto/category.dto";
+import { createCategory } from "@api/category";
 export default function CategoryForm() {
     const { register, handleSubmit, reset, formState: { errors }, } = useForm<CategoryFormData>();
     const [preview, setPreview] = useState<string[]>([]);
@@ -42,6 +42,27 @@ export default function CategoryForm() {
         Array.from(files).forEach((file) => {
             formData.append("images", file);
         });
+
+        try {
+            const createNewCategory = async () => {
+                const formDto: IFormData = {
+                    name: data.name,
+                    description: data.description,
+                    parentId: data.parent_id,
+                    images: files
+                };
+
+                const res = await createCategory(formDto);
+                console.log(res);
+
+            }
+
+            createNewCategory();
+        } catch (error) {
+
+        }
+
+
 
         // you can send `files` to backend here with FormData
         reset();

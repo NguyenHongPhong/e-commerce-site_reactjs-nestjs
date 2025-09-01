@@ -9,7 +9,7 @@ export default function () {
 
   ];
   return (<div className="@container">
-    <div className="w-full ">
+    <div className="w-full">
       <h2 className="text-2xl font-bold leading-8 text-(--color-primary-500)">CATEGORIES</h2>
       <div className="flex flex-wrap justify-center mt-4">
         {banners.map((category, index) => <Category key={index} id={index} name={"Shirt and dress and more"} slug={category} url={category} />)}
