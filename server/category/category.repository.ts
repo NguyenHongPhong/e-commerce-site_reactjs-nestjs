@@ -11,4 +11,8 @@ export class CategoryRepository {
             { data }
         );
     }
+
+    async getAll() {
+        return await this.prisma.category.findMany();
+    };
 }

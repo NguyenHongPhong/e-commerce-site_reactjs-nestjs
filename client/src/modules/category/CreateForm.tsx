@@ -3,11 +3,13 @@ import { useState, useEffect } from "react";
 import { CategoryFormData, CategoryOption } from "@uiTypes/dto/category.dto";
 import { IFormData } from "@uiTypes/dto/category.dto";
 import { createCategory } from "@api/category";
+import { useNavigate } from "react-router-dom";
 export default function CategoryForm() {
     const { register, handleSubmit, reset, formState: { errors }, } = useForm<CategoryFormData>();
     const [preview, setPreview] = useState<string[]>([]);
     const [categories, setCategories] = useState<CategoryOption[]>([]);
     const [files, setFiles] = useState<File[]>([]);
+    const navigate = useNavigate();
 
 
 
@@ -58,6 +60,7 @@ export default function CategoryForm() {
             }
 
             createNewCategory();
+            navigate('/');
         } catch (error) {
 
         }

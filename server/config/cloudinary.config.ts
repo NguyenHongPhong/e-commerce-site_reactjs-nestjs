@@ -17,6 +17,7 @@ export const MulterUploadOptions = {
         folder: 'category_imgs',
         resource_type: 'auto',
         public_id: file.originalname.split('.')[0],
+        invalidate: true, // 🚀 force CDN refresh
       };
     },
   }),

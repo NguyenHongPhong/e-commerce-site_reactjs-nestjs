@@ -4,7 +4,7 @@ import {
     Body,
     UploadedFiles,
     UseInterceptors,
-    InternalServerErrorException
+    Get
 } from '@nestjs/common';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { CreateCategoryDto } from './dto';
@@ -26,6 +26,11 @@ export class CategoryController {
     ) {
 
         return this.categoryService.create(body, files.images ?? []);
+    }
+
+    @Get('getAll')
+    getCategories() {
+        return this.categoryService.getAll();
     }
 
 }

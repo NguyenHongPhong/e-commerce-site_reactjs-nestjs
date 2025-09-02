@@ -38,4 +38,13 @@ export class CategoryImagesRepository {
 
         return result; // returns the inserted row
     }
+
+    async getAllByCategoryId(categoryId: string) {
+        const rs = await this.prisma.category_images.findMany({
+            where: {
+                category_id: categoryId
+            }
+        })
+        return rs;
+    }
 }

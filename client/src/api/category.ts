@@ -7,3 +7,7 @@ export const createCategory = (data: IFormData) => {
         headers: { "Content-Type": "multipart/form-data" }
     });
 }
+
+export const getCategories = () =>
+    api.get(API_BASE + '/getAll', {
+    });

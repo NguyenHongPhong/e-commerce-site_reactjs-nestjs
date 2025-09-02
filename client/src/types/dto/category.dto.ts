@@ -17,6 +17,41 @@ export interface IFormData {
     images: File[]
 }
 
+export type typeCategories = {
+    id: string,
+    name: string,
+    slug: string,
+    description: string,
+    parent_id: number,
+    is_active: boolean,
+    updatedAt: string,
+    createAt: string
+}
+
+export type typeCategoryImgs = {
+    categoryId: string;
+    imgs: { url: string; publicId: string; main: boolean }
+}
+
+export interface CategoryImageDto {
+    url: string;
+    publicId: string;
+    main: boolean;
+}
+
+// A single category
+export interface CategoryDto {
+    id: string;
+    name: string;
+    description: string;
+    slug: string;
+    parent_id: number;
+    is_active: boolean;
+    createAt: string;   // ISO date string from backend
+    updatedAt: string;  // ISO date string from backend
+    imgs: CategoryImageDto[];
+}
+
 export function toFormData(dto: IFormData): FormData {
     const formData = new FormData();
 
