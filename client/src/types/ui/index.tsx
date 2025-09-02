@@ -54,3 +54,28 @@ export interface IFormResetPassword {
     password: string;
     confirm_password: string;
 };
+
+export interface IClockTime {
+    hour: number;
+    minute: number;
+    second: number;
+}
+
+export type SessionParams =
+    | { serverNow: number; expiresIn: number }
+    | undefined;
+
+export type ErrorResponse = {
+    code?: string;
+};
+
+export interface ICategoryItem {
+    id: number;
+    name: string,
+    slug: string,
+    url: string
+}
+
+export type  Props = {
+  children: React.ReactNode;
+};

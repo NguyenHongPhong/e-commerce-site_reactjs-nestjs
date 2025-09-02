@@ -41,4 +41,17 @@ export class UserRepository {
         });
 
     };
+
+    async updateByField(id: string, value: any, fieldFinding: string, fieldUpdate: string) {
+        const row = await this.prisma.user.findFirst({
+            where: { [fieldFinding]: id },
+        });
+
+        if (!row) throw new Error('Not found');
+
+        return await this.prisma.user.update({
+            where: { id: row.id },
+            data: { [fieldUpdate]: value },
+        });
+    }
 }

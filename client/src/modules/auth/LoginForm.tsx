@@ -1,9 +1,9 @@
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faEnvelope, faEye, faPhone } from "@fortawesome/free-solid-svg-icons";
+import { faEnvelope, faEye } from "@fortawesome/free-solid-svg-icons";
 import { useEffect, useState } from "react";
 import { Link } from "react-router";
-import { useAppDispatch } from "../../hooks";
+import { useAppDispatch, useAppSelector } from "../../hooks";
 import { disableLoading, enableLoading } from "../../reducers/loading";
 import { notify } from "../../utils/toast";
 import { useForm } from "react-hook-form";
@@ -11,14 +11,32 @@ import { IFormLoginValues } from "../../types/ui";
 import { AxiosError } from 'axios';
 import { ILoginUserDto } from "../../types/dto/login-user.dto";
 import { login } from "../../api/auth";
-import { getProfile } from "../../api/user";
-
+import { useNavigate } from "react-router-dom";
+import { useRef } from "react";
+const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+const redirectUri = import.meta.env.VITE_GOOGLE_REDIRECT_LOGIN_URI;
+const scope = import.meta.env.VITE_GOOGLE_SCOPE;
+const authUrl = import.meta.env.VITE_GOOGLE_AUTH_URL;
 
 export default function () {
+    const urlToLoginByGG = `${authUrl}?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=${scope}&access_type=offline&prompt=consent`;
     const [emailInput, setEmailInput] = useState<string>("");
     const [isCheck, setIsCheck] = useState<boolean>(false);
     const [showPassword, setShowPassword] = useState(false);
     const dispatch = useAppDispatch();
+    const navigate = useNavigate();
+    const params = new URLSearchParams(window.location.search);
+    const reason = params.get("error");
+    const hasNotified = useRef(false);
+
+    useEffect(() => {
+        setTimeout(() => {
+            if (reason && !hasNotified.current) {
+                notify(reason, "error");
+                hasNotified.current = true;
+            }
+        }, 0)
+    }, [reason])
 
     useEffect(() => {
         const rememberedEmail = localStorage.getItem("rememberMe");
@@ -55,17 +73,22 @@ export default function () {
         try {
             dispatch(enableLoading());
             const res = await login(userLogin);
-            sessionStorage.setItem("accessToken", res.data.accessToken);
-            const userInformation = await getProfile(res.data.accessToken);
-            console.log(userInformation);
+            sessionStorage.setItem("time-ending", JSON.stringify(
+                { expiresIn: res.data.expiresIn, serverNow: res.data.serverNow }
+            ));
+
             setTimeout(async () => {
                 dispatch(disableLoading());
                 notify(res.data.message, "success");
             }, 2000);
+            setTimeout(() => {
+                navigate("/");
+            },
+                3000
+            )
         } catch (err) {
             const error = err as AxiosError;
             const message = (error.response?.data as any)?.message;
-
             console.error("Error log in:", message);
             dispatch(disableLoading());
             notify(message, "error");
@@ -132,7 +155,8 @@ export default function () {
                 </button>
 
                 {/* Sign in with Gmail */}
-                <a href={""} className="w-full p-3 rounded-[10px] outline-1 outline-offset-[-1px] outline-zinc-300
+                <a href={urlToLoginByGG}
+                    className="w-full p-3 rounded-[10px] outline-1 outline-offset-[-1px] outline-zinc-300
                  inline-flex flex-col justify-center items-center gap-2.5 hover:cursor-pointer">
                     <div className="inline-flex justify-start items-center gap-2.5">
                         <div className="w-6 h-6 relative overflow-hidden">

@@ -6,6 +6,8 @@ import { PrismaService } from './prisma/prisma.service';
 import { AuthModule } from './auth/auth.module';
 import { AuthMiddleware } from './common/middlewares/auth.middleware';
 import { OtpModule } from './otp/otp.module';
+import { CategoryModule } from './category/category.module';
+import { CategoryImagesModule } from './category_images/category_images.module';
 @Module({
     imports: [
         ConfigModule.forRoot({
@@ -14,7 +16,9 @@ import { OtpModule } from './otp/otp.module';
         }),
         UserModule,
         AuthModule,
-        OtpModule
+        OtpModule,
+        CategoryModule,
+        CategoryImagesModule
     ],
     controllers: [AppController],
     providers: [PrismaService],

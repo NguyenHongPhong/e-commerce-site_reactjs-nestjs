@@ -13,7 +13,7 @@ import { IOtp } from "../../types/dto/login-user.dto";
 import { useNavigate } from "react-router-dom";
 import { faAngleLeft } from "@fortawesome/free-solid-svg-icons";
 import { verifyOTP, resendOtp } from "../../api/otp";
-import OtpCountdown from "../../components/OtpCountdown/OtpCountdown";
+import OtpCountdown from "../../components/otpCountdown/OtpCountdown";
 
 
 

@@ -32,7 +32,7 @@ export class UserController {
         return this.userService.updateNewPasswordByEmail(data);
     }
 
-    //Author router
+    //Authenticate router
     @UseGuards(JwtAuthGuard)
     @Get("profile")
     async getProfile(@CurrentUser() user: any) {

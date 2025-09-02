@@ -9,7 +9,7 @@ import RecoveryPassword from "../pages/recovery/RecoveryPassword";
 import RecoverLayout from "../layouts/RecoverLayout";
 import VerifyOTP from "../pages/recovery/VerifyOTP";
 import ResetPassword from "../pages/recovery/ResetPassword";
-
+import CreatePage from "@pages/category/CreatePage";
 function AppRoutes() {
     return (
         <Routes>
@@ -27,6 +27,8 @@ function AppRoutes() {
                 <Route path="/verify-otp" element={<VerifyOTP />} />
                 <Route path="/reset-password" element={<ResetPassword />} />
             </Route>
+
+            <Route path="/create-category" element={<CreatePage />} />
 
         </Routes>
     )
