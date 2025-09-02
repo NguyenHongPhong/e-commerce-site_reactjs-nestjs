@@ -23,7 +23,7 @@ function Header() {
     const [idle, setIdle] = useState(0);
     const isIdle = useIdle(idle);
     const [showPrompt, setShowPrompt] = useState(false);
-    
+
     //call api to get profile
     useEffect(() => {
         const fetchProfile = async () => {
@@ -47,70 +47,70 @@ function Header() {
         };
     }, [profile]);
 
-    //Caculating expire time to check if user is inactive
-    useEffect(()=> {
-        const expiresIn = sessionStorage.getItem("time-ending");
-        if(expiresIn) {
-                const convertData = JSON.parse(expiresIn);
-                const rs = ((convertData.expiresIn ?? 0) * 1000)-5000;
-                setIdle(rs);
-        }
-                    
-    }, []);
+    // //Caculating expire time to check if user is inactive
+    // useEffect(()=> {
+    //     const expiresIn = sessionStorage.getItem("time-ending");
+    //     if(expiresIn) {
+    //             const convertData = JSON.parse(expiresIn);
+    //             const rs = ((convertData.expiresIn ?? 0) * 1000)-5000;
+    //             setIdle(rs);
+    //     }
 
-    //Call API when accessToken expired
-    useEffect(() => {
-        if (!isExpired) return;
-        if (timeUp && !isIdle) {
-            setTimeout(() => {
-                const fetchProfileAsTokenExpired = async () => {
-                    try {
-                        const res = await getProfile();
-                    } catch (e: any) {
-                        const err = e as AxiosError;
-                        const status = err?.response?.status;
+    // }, []);
 
-                        if (status !== 401) {
-                            return;
-                        }
-                    }
+    // //Call API when accessToken expired
+    // useEffect(() => {
+    //     if (!isExpired) return;
+    //     if (timeUp && !isIdle) {
+    //         setTimeout(() => {
+    //             const fetchProfileAsTokenExpired = async () => {
+    //                 try {
+    //                     const res = await getProfile();
+    //                 } catch (e: any) {
+    //                     const err = e as AxiosError;
+    //                     const status = err?.response?.status;
 
-                    try {
-                        const result = await refreshToken();
-                        const newTimer = { expiresIn: result.data.expiresIn, serverNow: result.data.serverNow };
-                        sessionStorage.setItem("time-ending", JSON.stringify(
-                            newTimer
-                        ));
+    //                     if (status !== 401) {
+    //                         return;
+    //                     }
+    //                 }
 
-                        window.dispatchEvent(new CustomEvent("token:updated", { detail: newTimer }));
+    //                 try {
+    //                     const result = await refreshToken();
+    //                     const newTimer = { expiresIn: result.data.expiresIn, serverNow: result.data.serverNow };
+    //                     sessionStorage.setItem("time-ending", JSON.stringify(
+    //                         newTimer
+    //                     ));
 
-                        const res = await getProfile();
-                        const user = res.data;
-                        setProfile(user);
-                    } catch (e) {
-                        const err = e as AxiosError<ErrorResponse>;
-                        const status = err?.response?.status;
-                        // Treat 401/403/410 as “must re-login”
-                        if (status === 401 || status === 403 || status === 410) {
-                            sessionStorage.removeItem("time-ending");
-                            console.log(err);
-                            setTimeout(() => {
-                                navigate("/login");
-                            }, 5000);
-                            return;
-                        }
-                    }
-                };
-                fetchProfileAsTokenExpired();
-            }, 2000);
-        }
-    }, [isExpired, isIdle]);
-    
-    useEffect(()=> {
-        if(isIdle) {
-           console.log("User is inactive");
-        }
-    }, [isIdle])
+    //                     window.dispatchEvent(new CustomEvent("token:updated", { detail: newTimer }));
+
+    //                     const res = await getProfile();
+    //                     const user = res.data;
+    //                     setProfile(user);
+    //                 } catch (e) {
+    //                     const err = e as AxiosError<ErrorResponse>;
+    //                     const status = err?.response?.status;
+    //                     // Treat 401/403/410 as “must re-login”
+    //                     if (status === 401 || status === 403 || status === 410) {
+    //                         sessionStorage.removeItem("time-ending");
+    //                         console.log(err);
+    //                         setTimeout(() => {
+    //                             navigate("/login");
+    //                         }, 5000);
+    //                         return;
+    //                     }
+    //                 }
+    //             };
+    //             fetchProfileAsTokenExpired();
+    //         }, 2000);
+    //     }
+    // }, [isExpired, isIdle]);
+
+    // useEffect(()=> {
+    //     if(isIdle) {
+    //        console.log("User is inactive");
+    //     }
+    // }, [isIdle])
 
 
 

@@ -15,6 +15,7 @@ export class AuthService {
     private clientId: string;
     private clientSecret: string;
     private redirectUri: string;
+    private redirectLoginUri: string;
     private oauth2Client: OAuth2Client;
     private readonly ACCESS_TTL = 60 * 1;        // 5 phút (giây)
     private readonly REFRESH_TTL = 60; // 7 ngày (giây)
@@ -24,6 +25,7 @@ export class AuthService {
         this.clientId = this.configService.get<string>('GOOGLE_CLIENT_ID')!;
         this.clientSecret = this.configService.get<string>('GOOGLE_CLIENT_SECRET')!;
         this.redirectUri = this.configService.get<string>('GOOGLE_REDIRECT_URI')!;
+        this.redirectLoginUri = this.configService.get<string>('GOOGLE_REDIRECT_LOGIN_URI')!;
         this.oauth2Client = new OAuth2Client(this.clientId, this.clientSecret, this.redirectUri);
     }
 
@@ -65,18 +67,59 @@ export class AuthService {
     }
 
     // Hàm tổng hợp lấy token và giải mã user info
-    async loginWithGoogle(code: string) {
-
+    async registerWithGoogle(code: string) {
         try {
             const tokens = await this.getTokens(code);
             const userInfo = await this.verifyIdTokenOfGoogle(tokens.id_token);
             // Tạo JWT riêng cho app dựa trên info user (ví dụ email, sub)
-
             const addedUser = await this.addUserProvider(userInfo);
             return addedUser;
 
         } catch (error) {
             console.log(error);
+            throw new HttpException('Failed to login from Google', HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    // Gửi request đổi code lấy token từ Google
+    async getTokensForLogin(code: string) {
+        const url = 'https://oauth2.googleapis.com/token';
+        const values = {
+            code,
+            client_id: this.clientId,
+            client_secret: this.clientSecret,
+            redirect_uri: this.redirectLoginUri,
+            grant_type: 'authorization_code',
+        };
+
+        try {
+            const res = await axios.post(url, new URLSearchParams(values).toString(), {
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            });
+            return res.data;
+        } catch (error) {
+            console.log(error);
+            throw new HttpException('Failed to fetch tokens from Google', HttpStatus.BAD_REQUEST);
+        }
+    }
+    // Hàm tổng hợp lấy token và giải mã user info
+    async loginWithGoogle(code: string) {
+
+        try {
+            const tokens = await this.getTokensForLogin(code);
+            const userInfo = await this.verifyIdTokenOfGoogle(tokens.id_token);
+            // Tạo JWT riêng cho app dựa trên info user (ví dụ email, sub)
+            if (userInfo.email) {
+                const isRegistered = await this.authRepository.findByField('email', userInfo.email);
+                if (isRegistered) {
+                    return await this.logIn(isRegistered);
+                }
+                throw new NotFoundException("This email has not registered yet !!!")
+            }
+        } catch (error) {
+            if (error instanceof HttpException) {
+                throw error; // let Nest handle it
+            }
             throw new HttpException('Failed to login from Google', HttpStatus.BAD_REQUEST);
         }
     }
@@ -118,7 +161,7 @@ export class AuthService {
             sub: user.id,       // Subject - ID của user trong DB của bạn, định danh duy nhất người sở hữu token
             iss: "e-commerce",         // Issuer - ai phát hành token này (ở đây là hệ thống e-commerce của bạn)
             role: ROLES.customer,
-        }, { expiresIn: this.ACCESS_TTL + 's' });
+        }, { expiresIn: this.ACCESS_TTL + '15m' });
 
         // refreshToken (dài hạn, dùng để cấp lại accessToken)
         const refreshToken = await this.jwtService.signAsync({
@@ -152,7 +195,7 @@ export class AuthService {
                 sub: user.id,       // Subject - ID của user trong DB của bạn, định danh duy nhất người sở hữu token
                 iss: "e-commerce",         // Issuer - ai phát hành token này (ở đây là hệ thống e-commerce của bạn)
                 role: ROLES.customer,
-            }, { expiresIn: this.ACCESS_TTL });
+            }, { expiresIn: '15m' });
 
             refreshToken = await this.jwtService.signAsync({
                 sub: user.id,

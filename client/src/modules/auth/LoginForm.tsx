@@ -12,13 +12,31 @@ import { AxiosError } from 'axios';
 import { ILoginUserDto } from "../../types/dto/login-user.dto";
 import { login } from "../../api/auth";
 import { useNavigate } from "react-router-dom";
+import { useRef } from "react";
+const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+const redirectUri = import.meta.env.VITE_GOOGLE_REDIRECT_LOGIN_URI;
+const scope = import.meta.env.VITE_GOOGLE_SCOPE;
+const authUrl = import.meta.env.VITE_GOOGLE_AUTH_URL;
 
 export default function () {
+    const urlToLoginByGG = `${authUrl}?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=${scope}&access_type=offline&prompt=consent`;
     const [emailInput, setEmailInput] = useState<string>("");
     const [isCheck, setIsCheck] = useState<boolean>(false);
     const [showPassword, setShowPassword] = useState(false);
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
+    const params = new URLSearchParams(window.location.search);
+    const reason = params.get("error");
+    const hasNotified = useRef(false);
+
+    useEffect(() => {
+        setTimeout(() => {
+            if (reason && !hasNotified.current) {
+                notify(reason, "error");
+                hasNotified.current = true;
+            }
+        }, 0)
+    }, [reason])
 
     useEffect(() => {
         const rememberedEmail = localStorage.getItem("rememberMe");
@@ -137,7 +155,8 @@ export default function () {
                 </button>
 
                 {/* Sign in with Gmail */}
-                <a href={""} className="w-full p-3 rounded-[10px] outline-1 outline-offset-[-1px] outline-zinc-300
+                <a href={urlToLoginByGG}
+                    className="w-full p-3 rounded-[10px] outline-1 outline-offset-[-1px] outline-zinc-300
                  inline-flex flex-col justify-center items-center gap-2.5 hover:cursor-pointer">
                     <div className="inline-flex justify-start items-center gap-2.5">
                         <div className="w-6 h-6 relative overflow-hidden">

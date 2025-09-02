@@ -28,7 +28,7 @@ export class AuthController {
                 throw new HttpException('Authorization code is missing', HttpStatus.BAD_REQUEST);
             }
 
-            await this.authService.loginWithGoogle(code);
+            await this.authService.registerWithGoogle(code);
 
             const messageEncoded = encodeURIComponent('Register successfully');
 
@@ -42,6 +42,35 @@ export class AuthController {
         }
 
     }
+
+    // Route xử lý callback sau khi Google redirect về
+    @Get('login')
+    async loginWithGoogle(@Query('code') code: string, @Res() res: Response) {
+        try {
+            if (!code) {
+                throw new HttpException('Authorization code is missing', HttpStatus.BAD_REQUEST);
+            }
+
+            const result = await this.authService.loginWithGoogle(code);
+            if (result?.accessToken && result.refreshToken) {
+                const { accessToken, refreshToken } = result;
+                res.cookie(ACCESS_TOKEN_COOKIE, accessToken, accessTokenCookieOptions);
+                res.cookie(REFRESH_TOKEN_COOKIE, refreshToken, refreshTokenCookieOptions);
+
+                return res.redirect(`${this.clientUrl}/`);
+            }
+
+        } catch (error) {
+            console.error(error);
+            // Redirect with error details
+            return res.redirect(`${this.clientUrl}/login/?error=${encodeURIComponent(
+                (error as Error).message || 'login_failed'
+            )}`);
+        }
+
+
+    }
+
 
     //Route xử lý login sử dụng guard để valid user
     @UseGuards(LocalAuthGuard)
