@@ -63,3 +63,16 @@
 .btn-yellow {
     @apply w-full p-3 bg-yellow-500 rounded-[10px] inline-flex justify-center items-start gap-2.5 hover:opacity-90 hover:cursor-pointer;
 }
+
+/* tags.css */
+.ReactTags__tag {
+    @apply border border-green-500 bg-green-50 text-green-700 px-3 py-1 rounded-full inline-flex items-center gap-1 text-sm;
+}
+
+.ReactTags__remove {
+    @apply text-red-500 font-bold cursor-pointer;
+}
+
+.ReactTags__remove:hover {
+    @apply text-red-700;
+}

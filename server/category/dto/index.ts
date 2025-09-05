@@ -14,11 +14,3 @@ export class CreateCategoryDto {
 }
 
 
-export type getCategoriesWithImgs = {
-    categoryId: string,
-    imgs: {
-        url: string,
-        publicId: string,
-        main: Boolean
-    }
-}

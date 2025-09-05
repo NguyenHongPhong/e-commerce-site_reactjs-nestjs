@@ -6,7 +6,7 @@ export class CategoryImagesRepository {
     constructor(private readonly prisma: PrismaService) {
     };
 
-    async insertMany(categoryId: string, images: ImageInput[]) {
+    async insertMany(categoryId: number, images: ImageInput[]) {
         await this.prisma.category_images.createMany({
             data: images.map((img, index) => ({
                 category_id: categoryId,
@@ -26,7 +26,7 @@ export class CategoryImagesRepository {
         return rs;
     }
 
-    async insertOne(categoryId: string, image: ImageInput) {
+    async insertOne(categoryId: number, image: ImageInput) {
         const result = await this.prisma.category_images.create({
             data: {
                 category_id: categoryId,
@@ -39,7 +39,7 @@ export class CategoryImagesRepository {
         return result; // returns the inserted row
     }
 
-    async getAllByCategoryId(categoryId: string) {
+    async getAllByCategoryId(categoryId: number) {
         const rs = await this.prisma.category_images.findMany({
             where: {
                 category_id: categoryId

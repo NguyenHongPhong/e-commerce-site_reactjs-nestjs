@@ -8,6 +8,7 @@ import { AuthMiddleware } from './common/middlewares/auth.middleware';
 import { OtpModule } from './otp/otp.module';
 import { CategoryModule } from './category/category.module';
 import { CategoryImagesModule } from './category_images/category_images.module';
+import { ProductModule } from './product/product.module';
 @Module({
     imports: [
         ConfigModule.forRoot({
@@ -18,7 +19,8 @@ import { CategoryImagesModule } from './category_images/category_images.module';
         AuthModule,
         OtpModule,
         CategoryModule,
-        CategoryImagesModule
+        CategoryImagesModule,
+        ProductModule
     ],
     controllers: [AppController],
     providers: [PrismaService],

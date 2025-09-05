@@ -1,6 +1,5 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { categoryDto } from './dto/category';
-import { getCategoriesWithImgs } from './dto';
 import { CategoryRepository } from './category.repository';
 import { CategoryImagesRepository } from '../category_images/category_images.repository';
 @Injectable()
@@ -59,25 +58,14 @@ export class CategoryService {
 
     async getAll() {
         const categories = await this.categoryRepository.getAll();
-        let imgByCategories: getCategoriesWithImgs[] = [];
-
         if (categories) {
-            await Promise.all(
+            const result = await Promise.all(
                 categories.map(async (category) => {
                     const rs = await this.categoryImagesRepository.getAllByCategoryId(category.id);
-                    const listImg = rs.map((img) => {
-                        const { url, publicId, main } = img;
-                        return {
-                            categoryId: category.id,
-                            imgs: { url, publicId, main },
-                        };
-                    });
-
-                    imgByCategories.push(...listImg);
+                    return { ...category, imgs: rs };
                 })
             );
-
-            return { ok: true, data: { category: categories, imgs: imgByCategories } };
+            return result;
         }
     }
 
