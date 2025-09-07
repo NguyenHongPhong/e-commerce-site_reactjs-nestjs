@@ -76,6 +76,23 @@ export interface ICategoryItem {
     url: string
 }
 
-export type  Props = {
-  children: React.ReactNode;
+export type Props = {
+    children: React.ReactNode;
+};
+
+export type TagProps = {
+    values: string[];
+    onChange: (newValues: string[]) => void;
+    field: string
+};
+
+export type FormCreateProductValues = {
+    title: string;
+    description: string;
+    price: number;
+    category: number | "";
+    colors: string[];
+    materials: string[];
+    sizes: string[];
+    imgs: File[];
 };

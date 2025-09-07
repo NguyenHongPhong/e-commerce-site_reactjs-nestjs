@@ -2,28 +2,15 @@ import React, { useState, useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { CategoryDto } from "@uiTypes/dto/category.dto";
 import { getCategories } from "@api/category";
-import { WithContext as ReactTags } from "react-tag-input";
-
-
-type Tag = { id: string; text: string };
-
-type FormValues = {
-    title: string;
-    description: string;
-    price: number;
-    category: number | "";
-    colors: Tag[];
-    materials: string;
-    sizes: string;
-    imgs: File[];
-};
+import Tags from "@components/tag/Tag";
+import { FormCreateProductValues } from "@uiTypes/ui";
 
 export default function ProductForm({
     onSubmit,
     initialValues,
 }: {
-    onSubmit?: (data: FormValues | FormData) => void;
-    initialValues?: Partial<FormValues>;
+    onSubmit?: (data: FormCreateProductValues | FormData) => void;
+    initialValues?: Partial<FormCreateProductValues>;
 }) {
     const {
         register,
@@ -32,25 +19,19 @@ export default function ProductForm({
         formState: { errors },
         setValue,
         watch,
-    } = useForm<FormValues>({
+    } = useForm<FormCreateProductValues>({
         defaultValues: {
             title: "",
             description: "",
             price: 0,
             category: "",
             colors: [],
-            materials: "",
-            sizes: "",
+            materials: [],
+            sizes: [],
             imgs: [],
             ...initialValues,
         },
     });
-
-    const KeyCodes = {
-        enter: 13,
-        comma: 188,
-    };
-    const delimiters = [KeyCodes.enter, KeyCodes.comma];
 
     const [categories, setCategories] = useState<CategoryDto[]>([]);
     const [previews, setPreviews] = useState<string[]>([]);
@@ -78,7 +59,7 @@ export default function ProductForm({
         setPreviews(urls);
     };
 
-    const submit = (data: FormValues) => {
+    const submit = (data: FormCreateProductValues) => {
         const formData = new FormData();
         formData.append("title", data.title);
         formData.append("description", data.description);
@@ -86,7 +67,7 @@ export default function ProductForm({
         formData.append("category", String(data.category));
 
         // convert tags to text array
-        data.colors.forEach((c) => formData.append("colors[]", c.text));
+        // data.colors.forEach((c) => formData.append("colors[]", c.text));
 
         data.imgs.forEach((file) => formData.append("imgs", file));
 
@@ -94,7 +75,7 @@ export default function ProductForm({
 
         console.log("submit plain:", {
             ...data,
-            colors: data.colors.map((c) => c.text),
+            // colors: data.colors.map((c) => c.text),
             imgs: data.imgs.map((f) => f.name),
         });
     };
@@ -112,7 +93,6 @@ export default function ProductForm({
                 <input
                     {...register("title", { required: "Title is required" })}
                     className="mt-1 block w-full rounded-lg border p-2"
-                    placeholder="Product title"
                 />
                 {errors.title && (
                     <p className="text-red-500 text-sm mt-1">{errors.title.message}</p>
@@ -126,7 +106,6 @@ export default function ProductForm({
                     {...register("description", { required: "Description is required" })}
                     className="mt-1 block w-full rounded-lg border p-2"
                     rows={4}
-                    placeholder="Short description"
                 />
                 {errors.description && (
                     <p className="text-red-500 text-sm mt-1">
@@ -179,44 +158,96 @@ export default function ProductForm({
                 </label>
             </div>
 
-            {/* Colors with ReactTags */}
-            <div className="mb-4">
-                <span className="text-sm font-medium">Colors</span>
-                <Controller
-                    name="colors"
-                    control={control}
-                    rules={{ required: "At least one color is required" }}
-                    render={({ field, fieldState }) => (
-                        <div className="flex flex-wrap gap-2 border rounded p-2 min-h-[3rem]">
-                            <ReactTags
-                                tags={field.value as any}
-                                delimiters={delimiters}
-                                handleDelete={(i) =>
-                                    field.onChange(field.value.filter((_, index) => index !== i))
-                                }
-                                handleAddition={(tag) => field.onChange([...field.value, tag])}
-                                handleDrag={(tag, currPos, newPos) => {
-                                    const newTags = [...field.value];
-                                    newTags.splice(currPos, 1);
-                                    newTags.splice(newPos, 0, tag as any);
-                                    field.onChange(newTags);
-                                }}
-                                inputFieldPosition="inline"
-                                autocomplete
-                                classNames={{
-                                    tags: "flex flex-wrap gap-2",
-                                    tag: "inline-flex items-center",
-                                    remove: "ml-1 cursor-pointer text-red-500 hover:text-red-700 font-bold"
-                                }}
-                            />
-                            {fieldState.error && (
-                                <p className="text-red-500 text-sm mt-1">
-                                    {fieldState.error.message}
-                                </p>
+            <div className="flex">
+                <span className="italic font-semibold underline mr-3">Note:</span>
+                <p className="">In below section, after you've wrote one value, click "Enter" to save it</p>
+            </div>
+
+            <div className="border-2 border-cyan-700 rounded-2xl p-3 mt-3">
+                {/* Colors */}
+                <div className="mb-6">
+                    <label className="block mb-2">
+                        <span className="text-sm font-medium">Colors</span>
+
+                        <Controller
+                            name="colors"
+                            control={control}
+                            rules={{
+                                required: "Please add at least one color",
+                                validate: (v) =>
+                                    (v && v.length > 0) || "This field cannot be empty",
+                            }}
+                            render={({ field }) => (
+                                <Tags
+                                    values={field.value}
+                                    onChange={field.onChange}
+                                    field="colors"
+                                />
                             )}
-                        </div>
-                    )}
-                />
+                        />
+
+                        {errors.colors && (
+                            <p className="text-red-500 text-sm mt-1">
+                                {errors.colors.message}
+                            </p>
+                        )}
+                    </label>
+                </div>
+
+                {/* Materials */}
+                <div className="mb-6">
+                    <label className="block mb-2">
+                        <span className="text-sm font-medium">Materials</span>
+
+                        <Controller
+                            name="materials"
+                            control={control}
+                            rules={{
+                                required: "Please add at least one material",
+                                validate: (v) => (v && v.length > 0) || "This field cannot be empty",
+                            }}
+                            render={({ field }) => (
+                                <Tags
+                                    values={field.value}
+                                    onChange={field.onChange}
+                                    field="materials"
+                                />
+                            )}
+                        />
+
+                        {errors.materials && (
+                            <p className="text-red-500 text-sm mt-1">
+                                {errors.materials.message as string}
+                            </p>
+                        )}
+                    </label>
+                </div>
+
+                {/* Sizes */}
+                <div className="mb-6">
+                    <label className="block mb-2">
+                        <span className="text-sm font-medium">Sizes</span>
+
+                        <Controller
+                            name="sizes"
+                            control={control}
+                            rules={{
+                                required: "Please add at least one size",
+                                validate: (v) => (v && v.length > 0) || "This field cannot be empty",
+                            }}
+                            render={({ field }) => (
+                                <Tags values={field.value} onChange={field.onChange} field="sizes" />
+                            )}
+                        />
+
+                        {errors.sizes && (
+                            <p className="text-red-500 text-sm mt-1">
+                                {errors.sizes.message as string}
+                            </p>
+                        )}
+                    </label>
+                </div>
+
             </div>
 
             {/* Images */}
