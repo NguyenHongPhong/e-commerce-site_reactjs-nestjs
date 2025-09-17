@@ -4,14 +4,9 @@ import { CategoryDto } from "@uiTypes/dto/category.dto";
 import { getCategories } from "@api/category";
 import Tags from "@components/tag/Tag";
 import { FormCreateProductValues } from "@uiTypes/ui";
+import { useCreateProductMutation } from "../queries/product.mutation";
 
-export default function ProductForm({
-    onSubmit,
-    initialValues,
-}: {
-    onSubmit?: (data: FormCreateProductValues | FormData) => void;
-    initialValues?: Partial<FormCreateProductValues>;
-}) {
+export default function ProductForm() {
     const {
         register,
         control,
@@ -24,15 +19,15 @@ export default function ProductForm({
             title: "",
             description: "",
             price: 0,
-            category: "",
+            category: 0,
             colors: [],
             materials: [],
             sizes: [],
-            imgs: [],
-            ...initialValues,
+            imgs: []
         },
     });
 
+    const createProductMutation = useCreateProductMutation();
     const [categories, setCategories] = useState<CategoryDto[]>([]);
     const [previews, setPreviews] = useState<string[]>([]);
 
@@ -65,19 +60,12 @@ export default function ProductForm({
         formData.append("description", data.description);
         formData.append("price", String(data.price));
         formData.append("category", String(data.category));
-
-        // convert tags to text array
-        // data.colors.forEach((c) => formData.append("colors[]", c.text));
-
         data.imgs.forEach((file) => formData.append("imgs", file));
+        data.colors.forEach((color) => formData.append("colors", color));
+        data.materials.forEach((material) => formData.append("materials", material));
+        data.sizes.forEach((size) => formData.append("sizes", size));
 
-        if (onSubmit) onSubmit(formData);
-
-        console.log("submit plain:", {
-            ...data,
-            // colors: data.colors.map((c) => c.text),
-            imgs: data.imgs.map((f) => f.name),
-        });
+        createProductMutation.mutate(formData);
     };
 
     return (

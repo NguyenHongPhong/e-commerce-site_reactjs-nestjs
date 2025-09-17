@@ -90,7 +90,7 @@ export type FormCreateProductValues = {
     title: string;
     description: string;
     price: number;
-    category: number | "";
+    category: number | 0;
     colors: string[];
     materials: string[];
     sizes: string[];

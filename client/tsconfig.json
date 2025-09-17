@@ -10,21 +10,53 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-     "baseUrl": "./src",
+    "baseUrl": "./src",
     "paths": {
-      "@api/*": ["api/*"],
-      "@components/*": ["components/*"],
-      "@pages/*": ["pages/*"],
-      "@constants/*": ["constants/*"],
-      "@features/*": ["features/*"],
-      "@layouts/*": ["layouts/*"],
-      "@modules/*": ["modules/*"],
-      "@reducers/*": ["reducers/*"],
-      "@routes/*": ["routes/*"],
-      "@sections/*": ["sections/*"],
-      "@uiTypes/*": ["types/*"],
-      "@utils/*": ["utils/*"],
-      "@hooks/*": ["hooks/*"]
+      "@api/*": [
+        "api/*"
+      ],
+      "@components/*": [
+        "components/*"
+      ],
+      "@pages/*": [
+        "pages/*"
+      ],
+      "@constants/*": [
+        "constants/*"
+      ],
+      "@features/*": [
+        "features/*"
+      ],
+      "@layouts/*": [
+        "layouts/*"
+      ],
+      "@modules/*": [
+        "modules/*"
+      ],
+      "@reducers/*": [
+        "reducers/*"
+      ],
+      "@routes/*": [
+        "routes/*"
+      ],
+      "@sections/*": [
+        "sections/*"
+      ],
+      "@uiTypes/*": [
+        "types/*"
+      ],
+      "@utils/*": [
+        "utils/*"
+      ],
+      "@hooks/*": [
+        "hooks/*"
+      ],
+      "@lib/*": [
+        "lib/*"
+      ],
+      "@providers/*": [
+        "providers/*"
+      ],
     }
   },
   "include": [

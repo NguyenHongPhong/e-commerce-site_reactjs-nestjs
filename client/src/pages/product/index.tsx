@@ -1,4 +1,4 @@
-import CreateForm from '@modules/product/CreateForm';
+import CreateForm from '@modules/product/hooks/CreateForm';
 function ProductPage() {
     return (
         <div className="@container">

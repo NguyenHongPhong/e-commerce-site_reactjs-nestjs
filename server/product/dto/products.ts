@@ -1,22 +1,30 @@
-import { IsBoolean, IsInt, IsOptional, IsString } from 'class-validator';
+import { IsString, IsNumber, IsArray } from 'class-validator';
+import { Transform } from 'class-transformer';
 
 export class CreateProductDto {
     @IsString()
-    name!: string;
+    title!: string;
 
     @IsString()
-    slug!: string;
+    description!: string;
 
-    @IsOptional()
-    @IsString()
-    description?: string;
+    @IsNumber()
+    @Transform(({ value }) => parseFloat(value)) // convert string -> number
+    price!: number;
 
-    @IsOptional()
-    @IsInt()
-    parent_id?: number;
+    @IsNumber()
+    @Transform(({ value }) => parseInt(value)) // convert string -> number
+    category!: number;
 
-    @IsOptional()
-    @IsBoolean()
-    is_active?: boolean;
+    @IsArray()
+    @Transform(({ value }) => Array.isArray(value) ? value : [value]) // ép thành array
+    colors!: string[];
+
+    @IsArray()
+    @Transform(({ value }) => Array.isArray(value) ? value : [value])
+    materials!: string[];
+
+    @IsArray()
+    @Transform(({ value }) => Array.isArray(value) ? value : [value]) // ép thành array
+    sizes!: string[];
 }
-

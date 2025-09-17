@@ -7,7 +7,9 @@
             "request": "launch",
             "runtimeArgs": [
                 "-r",
-                "ts-node/register"
+                "ts-node/register",
+                "-r",
+                "tsconfig-paths/register"
             ],
             "args": [
                 "${workspaceFolder}/server/main.ts"
