@@ -13,6 +13,11 @@ export class CategoryRepository {
     }
 
     async getAll() {
-        return await this.prisma.category.findMany();
+        const categories = await this.prisma.category.findMany({
+            include: {
+                images: true,
+            },
+        });
+        return categories;
     };
 }

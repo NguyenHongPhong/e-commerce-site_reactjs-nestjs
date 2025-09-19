@@ -13,5 +13,16 @@ export class ProductRepository {
     }
 
     async getAll() {
+        return this.prisma.product.findMany({
+            include: {
+                product_Images: true,
+                colors: true,
+                materials: true,
+                sizes: true,
+            },
+            orderBy: {
+                created_at: 'desc',
+            },
+        });
     };
 }

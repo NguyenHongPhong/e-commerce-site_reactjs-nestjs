@@ -59,14 +59,9 @@ export class CategoryService {
     async getAll() {
         const categories = await this.categoryRepository.getAll();
         if (categories) {
-            const result = await Promise.all(
-                categories.map(async (category) => {
-                    const rs = await this.categoryImagesRepository.getAllByCategoryId(category.id);
-                    return { ...category, imgs: rs };
-                })
-            );
-            return result;
+            return categories;
         }
+        throw new InternalServerErrorException('Failed to get all category.');
     }
 
 }

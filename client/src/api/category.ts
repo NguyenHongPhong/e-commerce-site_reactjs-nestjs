@@ -1,3 +1,4 @@
+import { data } from 'react-router';
 import api from ".";
 import { IFormData, toFormData } from "@uiTypes/dto/category.dto";
 const API_BASE = '/categories';
@@ -8,6 +9,7 @@ export const createCategory = (data: IFormData) => {
     });
 }
 
-export const getCategories = () =>
-    api.get(API_BASE + '/getAll', {
-    });
+export const getCategories = async () => {
+    const res = await api.get(API_BASE + '/getAll');
+    return res.data;
+}

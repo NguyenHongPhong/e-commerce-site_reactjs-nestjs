@@ -11,6 +11,7 @@ import VerifyOTP from "../pages/recovery/VerifyOTP";
 import ResetPassword from "../pages/recovery/ResetPassword";
 import CreatePage from "@pages/category/CreatePage";
 import ProductPage from "@pages/product/index";
+import { ProtectedRoute } from "@components/protectedRoute";
 function AppRoutes() {
     return (
         <Routes>
@@ -29,10 +30,16 @@ function AppRoutes() {
                 <Route path="/reset-password" element={<ResetPassword />} />
             </Route>
 
-            <Route path="/create-category" element={<CreatePage />} />
+            <Route path="/create-category" element={
+                <ProtectedRoute>
+                    <CreatePage />
+                </ProtectedRoute>} />
 
-            <Route path="/products/create" element={<ProductPage />} />
-
+            <Route path="/products/create"
+                element={
+                    <ProtectedRoute>
+                        <ProductPage />
+                    </ProtectedRoute>} />
         </Routes>
     )
 }

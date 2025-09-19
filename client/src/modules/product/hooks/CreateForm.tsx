@@ -4,7 +4,7 @@ import { CategoryDto } from "@uiTypes/dto/category.dto";
 import { getCategories } from "@api/category";
 import Tags from "@components/tag/Tag";
 import { FormCreateProductValues } from "@uiTypes/ui";
-import { useCreateProductMutation } from "../queries/product.mutation";
+import { useCreateProductMutation, } from "../queries";
 import { useAppDispatch, useAppSelector } from "hooks";
 import { disableLoading, enableLoading } from "@reducers/loading";
 import { notify } from "@utils/toast";

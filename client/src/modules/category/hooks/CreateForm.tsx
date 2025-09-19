@@ -28,7 +28,7 @@ export default function CategoryForm() {
         }
     }, []);
 
-    const onSubmit = (data: CategoryFormData) => {
+    const onSubmit = async (data: CategoryFormData) => {
 
         if (!data) {
             return;
@@ -47,18 +47,15 @@ export default function CategoryForm() {
         });
 
         try {
-            const createNewCategory = async () => {
-                const formDto: IFormData = {
-                    name: data.name,
-                    description: data.description,
-                    parentId: data.parent_id,
-                    images: files
-                };
 
-                await createCategory(formDto);
-            }
+            const formDto: IFormData = {
+                name: data.name,
+                description: data.description,
+                parentId: data.parent_id,
+                images: files
+            };
 
-            createNewCategory();
+            await createCategory(formDto);
             navigate('/');
         } catch (error) {
             const err = error as any;

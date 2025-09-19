@@ -19,7 +19,6 @@ function Header() {
     const user = useAppSelector((s) => s.auth.user);
     const status = useAppSelector((s) => s.auth.status);
     const [profile, setProfile] = useState<IProfileUserDto>();
-    const navigate = useNavigate();
     const [idle, setIdle] = useState(0);
     const isIdle = useIdle(idle);
     const [showPrompt, setShowPrompt] = useState(false);
