@@ -4,7 +4,7 @@
   "main": "index.js",
   "module": "module",
   "scripts": {
-    "start": "ts-node main.ts"
+    "dev": "ts-node -r tsconfig-paths/register main.ts"
   },
   "keywords": [],
   "author": "",
@@ -50,6 +50,7 @@
     "npm": "^11.5.2",
     "prisma": "^6.15.0",
     "ts-node": "^10.9.2",
+    "tsconfig-paths": "^4.2.0",
     "typescript": "^5.9.2"
   }
 }

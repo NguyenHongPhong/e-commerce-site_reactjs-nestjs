@@ -60,7 +60,7 @@ model Otp {
 }
 
 model Category {
-  id          String   @id @default(uuid())
+  id          Int   @id @default(autoincrement())
   name        String
   slug        String
   description String?
@@ -72,8 +72,57 @@ model Category {
 
 model Category_images {
   id          String  @id @default(uuid())
-  category_id String
+  category_id Int
   url         String
   publicId    String
   main        Boolean @default(false)
 }
+
+model Product {
+  id           String  @id @default(uuid())
+  title        String
+  slug         String           @unique
+  description  String?          @db.Text
+  price        Float
+  rate_star    Float?            @default(0)
+  rate_count   Int?              @default(0)
+  sold         Int?              @default(0)
+  category_id  Int
+  shop_id      Int?
+  created_at   DateTime         @default(now())
+  updated_at   DateTime         @updatedAt
+}
+
+model Color {
+  id         Int     @id @default(autoincrement())
+  name       String
+  product_id String
+}
+
+model Material {
+  id         Int     @id @default(autoincrement())
+  name       String
+  product_id String
+}
+
+model Size {
+  id         Int     @id @default(autoincrement())
+  name       String
+  product_id String
+}
+
+model Product_Images {
+  id         Int     @id @default(autoincrement())
+  url        String
+  public_Id  String
+  product_id String
+
+}
+
+model Rate {
+  id          Int     @id @default(autoincrement())
+  user_id     String?
+  product_id  String?
+  star_rating Int?
+}
+

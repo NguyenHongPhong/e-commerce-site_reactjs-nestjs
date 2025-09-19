@@ -1,16 +1,7 @@
 import { Outlet, Link } from "react-router";
 import LeftSection from "../components/auth";
-import LoadingOverlay from 'react-loading-overlay-ts';
-import { BounceLoader } from 'react-spinners';
-import { useAppSelector } from "../hooks";
-
 export default function () {
-    const isLoading = useAppSelector((state) => state.loading.value);
-    return (<LoadingOverlay
-        active={isLoading}
-        spinner={<BounceLoader color="#36d7b7" />}
-        text="Loading..."
-    >
+    return (
         <div className="@container h-[100vh]">
             <div className="flex p-5">
                 <div className="w-1/2 flex items-center">
@@ -27,5 +18,5 @@ export default function () {
                 </div>
             </div>
         </div>
-    </LoadingOverlay>)
+    )
 }

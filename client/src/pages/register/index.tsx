@@ -1,4 +1,4 @@
-import RegisterForm from "../../modules/auth/RegisterForm";
+import RegisterForm from "@modules/auth/hooks/RegisterForm"
 export default function RegisterPage() {
     return (
         <div className="">

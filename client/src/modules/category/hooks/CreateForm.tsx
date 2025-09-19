@@ -3,29 +3,30 @@ import { useState, useEffect } from "react";
 import { CategoryFormData, CategoryOption } from "@uiTypes/dto/category.dto";
 import { IFormData } from "@uiTypes/dto/category.dto";
 import { createCategory } from "@api/category";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { getCategories } from "@api/category";
+import { CategoryDto } from "@uiTypes/dto/category.dto";
 export default function CategoryForm() {
     const { register, handleSubmit, reset, formState: { errors }, } = useForm<CategoryFormData>();
     const [preview, setPreview] = useState<string[]>([]);
-    const [categories, setCategories] = useState<CategoryOption[]>([]);
+    const [categories, setCategories] = useState<CategoryDto[]>([]);
     const [files, setFiles] = useState<File[]>([]);
     const navigate = useNavigate();
 
 
-
-
-
     // Fake fetch categories (replace with API call)
-    // useEffect(() => {
-    //     async function fetchCategories() {
-    //         const res = await fetch("http://localhost:3000/api/categories");
-    //         if (res.ok) {
-    //             const data = await res.json();
-    //             setCategories(data);
-    //         }
-    //     }
-    //     fetchCategories();
-    // }, []);
+    useEffect(() => {
+        try {
+            async function fetchCategories() {
+                const res = await getCategories();
+                const data = res.data;
+                setCategories(data);
+            }
+            fetchCategories();
+        } catch (error) {
+            console.log(error);
+        }
+    }, []);
 
     const onSubmit = (data: CategoryFormData) => {
 
@@ -54,20 +55,16 @@ export default function CategoryForm() {
                     images: files
                 };
 
-                const res = await createCategory(formDto);
-                console.log(res);
-
+                await createCategory(formDto);
             }
 
             createNewCategory();
             navigate('/');
         } catch (error) {
-
+            const err = error as any;
+            console.log(err.response?.data.message);
         }
 
-
-
-        // you can send `files` to backend here with FormData
         reset();
         setPreview([]);
     };
@@ -79,7 +76,6 @@ export default function CategoryForm() {
             const selectedFiles = Array.from(e.target.files);
             setFiles(selectedFiles);
             setPreview(urls);
-
         }
     };
 
@@ -155,6 +151,5 @@ export default function CategoryForm() {
                 Create Category
             </button>
         </form>
-
     );
 }

@@ -1,4 +1,4 @@
-import LoginForm from "../../modules/auth/LoginForm";
+import LoginForm from "@modules/auth/hooks/LoginForm"
 
 export default function LoginPage() {
     return (<div className="">
