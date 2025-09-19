@@ -1,0 +1,1 @@
+export { materialDto } from "./material.dto";

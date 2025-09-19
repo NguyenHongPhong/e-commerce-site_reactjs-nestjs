@@ -1,1 +1,1 @@
-export { CreateProductDto } from "./products";
+export { CreateProductDto, CreateProductDtoInRepo } from "./products.dto";

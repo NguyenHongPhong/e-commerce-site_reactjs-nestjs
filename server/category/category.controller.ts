@@ -20,10 +20,9 @@ export class CategoryController {
     )
     create(
         @Body() body: CreateCategoryDto,
-        @UploadedFiles() files: { images?: Express.Multer.File[] },
+        @UploadedFiles() files: Express.Multer.File[],
     ) {
-
-        return this.categoryService.create(body, files.images ?? []);
+        return this.categoryService.create(body, files ?? []);
     }
 
     @Get('getAll')

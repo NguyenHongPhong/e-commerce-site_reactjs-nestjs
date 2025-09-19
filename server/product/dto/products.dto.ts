@@ -28,3 +28,21 @@ export class CreateProductDto {
     @Transform(({ value }) => Array.isArray(value) ? value : [value]) // ép thành array
     sizes!: string[];
 }
+
+export class CreateProductDtoInRepo {
+    @IsString()
+    title!: string;
+
+    @IsString()
+    slug!: string;
+
+    @IsString()
+    description!: string;
+
+    @IsNumber()
+    price!: number;
+
+    @IsNumber()
+    category_id!: number;
+}
+

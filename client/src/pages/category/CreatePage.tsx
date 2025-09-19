@@ -1,4 +1,4 @@
-import CreateForm from "@modules/category/CreateForm"
+import CreateForm from "@modules/category/hooks/CreateForm"
 export default () => {
     return (
         <div className="@container">

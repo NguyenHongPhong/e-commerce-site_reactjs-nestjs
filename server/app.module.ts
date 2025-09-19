@@ -9,6 +9,10 @@ import { OtpModule } from './otp/otp.module';
 import { CategoryModule } from './category/category.module';
 import { CategoryImagesModule } from './category_images/category_images.module';
 import { ProductModule } from './product/product.module';
+import { ColorModule } from './color/color.module';
+import { MaterialModule } from './material/material.module';
+import { SizeModule } from './size/size.module';
+import { ProductImgModule } from './product_img/product.img.module';
 @Module({
     imports: [
         ConfigModule.forRoot({
@@ -20,7 +24,11 @@ import { ProductModule } from './product/product.module';
         OtpModule,
         CategoryModule,
         CategoryImagesModule,
-        ProductModule
+        ProductModule,
+        ColorModule,
+        MaterialModule,
+        SizeModule,
+        ProductImgModule
     ],
     controllers: [AppController],
     providers: [PrismaService],

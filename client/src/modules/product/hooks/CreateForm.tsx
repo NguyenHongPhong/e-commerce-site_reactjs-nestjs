@@ -5,6 +5,9 @@ import { getCategories } from "@api/category";
 import Tags from "@components/tag/Tag";
 import { FormCreateProductValues } from "@uiTypes/ui";
 import { useCreateProductMutation } from "../queries/product.mutation";
+import { useAppDispatch, useAppSelector } from "hooks";
+import { disableLoading, enableLoading } from "@reducers/loading";
+import { notify } from "@utils/toast";
 
 export default function ProductForm() {
     const {
@@ -27,6 +30,7 @@ export default function ProductForm() {
         },
     });
 
+    const dispatch = useAppDispatch();
     const createProductMutation = useCreateProductMutation();
     const [categories, setCategories] = useState<CategoryDto[]>([]);
     const [previews, setPreviews] = useState<string[]>([]);
@@ -65,7 +69,18 @@ export default function ProductForm() {
         data.materials.forEach((material) => formData.append("materials", material));
         data.sizes.forEach((size) => formData.append("sizes", size));
 
-        createProductMutation.mutate(formData);
+        dispatch(enableLoading());
+
+        createProductMutation.mutate(formData, {
+            onSuccess: (data: any) => {
+                dispatch(disableLoading());
+                notify(data.message, "success");
+            },
+            onError: (error: any) => {
+                dispatch(disableLoading());
+                console.error("❌ Error:", error);
+            },
+        });
     };
 
     return (

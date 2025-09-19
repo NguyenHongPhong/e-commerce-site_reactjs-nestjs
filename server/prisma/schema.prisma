@@ -79,10 +79,10 @@ model Category_images {
 }
 
 model Product {
-  id           Int              @id @default(autoincrement())
+  id           String  @id @default(uuid())
   title        String
   slug         String           @unique
-  description  String?
+  description  String?          @db.Text
   price        Float
   rate_star    Float?            @default(0)
   rate_count   Int?              @default(0)
@@ -96,33 +96,33 @@ model Product {
 model Color {
   id         Int     @id @default(autoincrement())
   name       String
-  product_id Int
+  product_id String
 }
 
 model Material {
   id         Int     @id @default(autoincrement())
   name       String
-  product_id Int
+  product_id String
 }
 
 model Size {
   id         Int     @id @default(autoincrement())
   name       String
-  product_id Int
+  product_id String
 }
 
 model Product_Images {
   id         Int     @id @default(autoincrement())
   url        String
   public_Id  String
-  product_id Int
+  product_id String
 
 }
 
 model Rate {
   id          Int     @id @default(autoincrement())
   user_id     String?
-  product_id  Int?
+  product_id  String?
   star_rating Int?
 }
 
