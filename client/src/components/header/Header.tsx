@@ -1,8 +1,7 @@
-import { Link } from "react-router";
+import { Link } from "react-router-dom";
 import { getProfile } from "../../api/user";
 import { useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../hooks";
-import { authenticated, unauthenticated } from "../../reducers/auth";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCaretDown } from "@fortawesome/free-solid-svg-icons"
 import { useSessionExpiryCountdown } from "../../features/auth/hooks/useSessionExpiryCountdown";
@@ -12,41 +11,24 @@ import { useIdle } from "../../features/ui/hooks/useIdle";
 import { useNavigate } from "react-router-dom";
 import type { AxiosError } from "axios";
 import { ErrorResponse } from "../../types/ui";
-
+import { authenticated, unauthenticated } from "@reducers/auth";
+import { useLogoutmutation } from "@modules/auth/queries";
+import { notify } from "@utils/toast";
 function Header() {
-    const { secondsLeft, isExpired, timeUp } = useSessionExpiryCountdown("time-ending");
-    const dispatch = useAppDispatch();
+    // const { secondsLeft, isExpired, timeUp } = useSessionExpiryCountdown("time-ending");
     const user = useAppSelector((s) => s.auth.user);
     const status = useAppSelector((s) => s.auth.status);
-    const [profile, setProfile] = useState<IProfileUserDto>();
-    const navigate = useNavigate();
     const [idle, setIdle] = useState(0);
     const isIdle = useIdle(idle);
     const [showPrompt, setShowPrompt] = useState(false);
+    const dispatch = useAppDispatch();
+    const { mutate: logout, data: message, isSuccess, error } = useLogoutmutation();
 
-    //call api to get profile
-    useEffect(() => {
-        const fetchProfile = async () => {
-            try {
-                const res = await getProfile();
-                const user = res.data;
-                setProfile(user);
-
-            } catch (err) {
-                dispatch(unauthenticated());
-                console.error(err);
-            }
-        };
-        fetchProfile();
-    }, []);
-
-    //assign data to store redux then could access in multiple pages
-    useEffect(() => {
-        if (profile) {
-            dispatch(authenticated({ user: profile }));
-        };
-    }, [profile]);
-
+    const handleLogout = () => {
+        dispatch(unauthenticated());
+        logout(); // gọi API logout
+        notify(message, "success");
+    };
     // //Caculating expire time to check if user is inactive
     // useEffect(()=> {
     //     const expiresIn = sessionStorage.getItem("time-ending");
@@ -123,14 +105,16 @@ function Header() {
                         <div className="w-36 h-8 text-gray-900 text-xl font-bold font-['Gordita'] leading-loose">E-commerce</div>
                     </div>
                 </Link>
-                <nav className={`text-lg grow flex justify-between items-center ${status === "authenticated" ? `ml-32 ` : ``}`}>
+                <nav className={`text-lg grow flex justify-between items-center ${user ? `ml-32 ` : ``}`}>
                     <Link to="/">Home</Link>
                     <Link to="/categories">Categories</Link>
                     <Link to="/about">About</Link>
                     <Link to="/contact">Contact</Link>
                 </nav>
 
-                {status === "guest" && (<div className="flex items-center grow justify-end">
+                {status === "loading" && (<div>Loading......</div>)}
+
+                {!user && (<div className="flex items-center grow justify-end">
                     <Link to="/login" className="mr-5 text-gray-900 text-base font-semibold font-['Plus_Jakarta_Sans'] 
                     leading-7">Log in</Link>
                     <Link to="/register" className="w-28 h-12 bg-gray-900 rounded-md flex justify-center items-center
@@ -139,14 +123,14 @@ function Header() {
                     </Link>
                 </div>)}
 
-                {status === "authenticated" && (<div className="grow-2"></div>)}
+                {user && (<div className="grow"></div>)}
 
-                {profile && status === "authenticated" && (
+                {user && (
                     <div className=" relative group hover:cursor-pointer after:content-['']
                     after:w-full after:h-6 after:absolute">
                         <div className="items-center justify-end flex">
-                            <img className="w-10 h-10 rounded-full mr-2" src={profile.portrait!} alt="" />
-                            <span className="font-semibold">{profile.username}</span>
+                            <img className="w-10 h-10 rounded-full mr-2" src={user?.portrait || ""} alt="" />
+                            <span className="font-semibold">{user.first_name}</span>
                             <FontAwesomeIcon icon={faCaretDown} />
                         </div>
                         <div className="w-0 h-0 border-l-transparent border-r-transparent
@@ -163,7 +147,7 @@ function Header() {
                                 <li className="hover:underline">Personal information</li>
                                 <li className="hover:underline">Historical</li>
                                 <li className="hover:underline">Setting</li>
-                                <li className="hover:underline">Log out</li>
+                                <li className="hover:underline" onClick={handleLogout}>Log out</li>
                             </ul>
                         </div>
                     </div>)}

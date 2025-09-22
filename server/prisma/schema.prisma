@@ -60,55 +60,73 @@ model Otp {
 }
 
 model Category {
-  id          Int   @id @default(autoincrement())
+  id          Int               @id @default(autoincrement())
   name        String
   slug        String
-  description String?
+  description String?           @db.Text
   parent_id   Int?
-  is_active   Boolean  @default(true)
-  updatedAt   DateTime @updatedAt
-  createAt    DateTime @default(now())
+  is_active   Boolean           @default(true)
+  updatedAt   DateTime          @updatedAt
+  createAt    DateTime          @default(now())
+
+  images      Category_images[] @relation("CategoryImages")
 }
 
 model Category_images {
-  id          String  @id @default(uuid())
+  id          String   @id @default(uuid())
   category_id Int
   url         String
   publicId    String
-  main        Boolean @default(false)
+  main        Boolean  @default(false)
+
+  category    Category @relation("CategoryImages", fields: [category_id], references: [id])
 }
 
+
 model Product {
-  id           String  @id @default(uuid())
+  id           String            @id @default(uuid())
   title        String
-  slug         String           @unique
-  description  String?          @db.Text
+  slug         String            @unique
+  description  String?           @db.Text
   price        Float
   rate_star    Float?            @default(0)
   rate_count   Int?              @default(0)
   sold         Int?              @default(0)
   category_id  Int
   shop_id      Int?
-  created_at   DateTime         @default(now())
-  updated_at   DateTime         @updatedAt
+  created_at   DateTime          @default(now())
+  updated_at   DateTime          @updatedAt
+
+  // Relations
+  product_Images Product_Images[]
+  colors         Color[]
+  materials      Material[]
+  sizes          Size[]
+  rates          Rate[]
 }
 
 model Color {
   id         Int     @id @default(autoincrement())
   name       String
   product_id String
+
+  product    Product @relation(fields: [product_id], references: [id], onDelete: Cascade)
 }
 
 model Material {
   id         Int     @id @default(autoincrement())
   name       String
   product_id String
+
+  product    Product @relation(fields: [product_id], references: [id], onDelete: Cascade)
 }
 
 model Size {
   id         Int     @id @default(autoincrement())
   name       String
   product_id String
+
+  product    Product @relation(fields: [product_id], references: [id], onDelete: Cascade)
 }
 
 model Product_Images {
@@ -117,12 +135,17 @@ model Product_Images {
   public_Id  String
   product_id String
 
+  product    Product @relation(fields: [product_id], references: [id], onDelete: Cascade)
 }
 
 model Rate {
   id          Int     @id @default(autoincrement())
   user_id     String?
   product_id  String?
+
   star_rating Int?
+
+  product   Product? @relation(fields: [product_id], references: [id], onDelete: Cascade)
 }
+
 

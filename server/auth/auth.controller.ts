@@ -67,8 +67,6 @@ export class AuthController {
                 (error as Error).message || 'login_failed'
             )}`);
         }
-
-
     }
 
 
@@ -92,6 +90,17 @@ export class AuthController {
         res.cookie(ACCESS_TOKEN_COOKIE, newAccessToken, accessTokenCookieOptions);
         res.cookie(REFRESH_TOKEN_COOKIE, newRefreshToken, refreshTokenCookieOptions);
         return { ok: true, user: userInfo, expiresIn, serverNow };
+    }
+
+    @Post('logout')
+    async logout(@Res({ passthrough: true }) res: Response) {
+        res.cookie('accessToken', '', {
+            httpOnly: true,
+            secure: true,
+            sameSite: 'strict',
+            expires: new Date(0),
+        });
+        return res.send({ message: 'Logged out successfully' });
     }
 
 

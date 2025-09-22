@@ -1,4 +1,4 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { CreateProductDto } from './dto';
 import { ProductRepository } from './product.repository';
 import { ColorRepository } from '@/color/color.repository';
@@ -85,7 +85,11 @@ export class ProductService {
 
 
     async getAll() {
+        const products = await this.productRepo.getAll();
+        if (products) {
+            return products;
+        }
+        throw new NotFoundException("Not found products");
     }
 
 }
-

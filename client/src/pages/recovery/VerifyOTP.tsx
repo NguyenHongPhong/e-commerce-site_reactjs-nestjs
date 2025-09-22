@@ -2,7 +2,7 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faShield } from "@fortawesome/free-solid-svg-icons";
 import { useEffect, useRef, useState, useCallback } from "react";
-import { Link } from "react-router";
+import { Link } from "react-router-dom";
 import { useAppDispatch } from "../../hooks";
 import { disableLoading, enableLoading } from "../../reducers/loading";
 import { notify } from "../../utils/toast";

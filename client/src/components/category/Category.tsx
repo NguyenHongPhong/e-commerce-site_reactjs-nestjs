@@ -1,5 +1,5 @@
 import { ICategoryItem } from "../../types/ui";
-import { Link } from "react-router";
+import { Link } from "react-router-dom";
 
 export default (props: ICategoryItem) => {
     const { slug, url, name, id } = props;

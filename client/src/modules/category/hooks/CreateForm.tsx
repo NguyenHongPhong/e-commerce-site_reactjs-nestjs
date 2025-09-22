@@ -1,34 +1,26 @@
 import { useForm } from "react-hook-form";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { CategoryFormData, CategoryOption } from "@uiTypes/dto/category.dto";
 import { IFormData } from "@uiTypes/dto/category.dto";
 import { createCategory } from "@api/category";
-import { Link, useNavigate } from "react-router-dom";
-import { getCategories } from "@api/category";
-import { CategoryDto } from "@uiTypes/dto/category.dto";
+import { useNavigate } from "react-router-dom";
+import { useQueryAllCategory } from "../queries";
+import { useCreateCategoryMutation } from "../queries";
+import { disableLoading, enableLoading } from "@reducers/loading";
+import { notify } from "@utils/toast";
+import { useDispatch } from "react-redux";
+import { useQueryClient } from "@tanstack/react-query";
 export default function CategoryForm() {
     const { register, handleSubmit, reset, formState: { errors }, } = useForm<CategoryFormData>();
     const [preview, setPreview] = useState<string[]>([]);
-    const [categories, setCategories] = useState<CategoryDto[]>([]);
     const [files, setFiles] = useState<File[]>([]);
     const navigate = useNavigate();
+    const { data: categories, isLoading: isLoadingCategories, error: categoriesError } = useQueryAllCategory();
+    const createCategoryMutation = useCreateCategoryMutation();
+    const dispatch = useDispatch();
+    const queryClient = useQueryClient();
 
-
-    // Fake fetch categories (replace with API call)
-    useEffect(() => {
-        try {
-            async function fetchCategories() {
-                const res = await getCategories();
-                const data = res.data;
-                setCategories(data);
-            }
-            fetchCategories();
-        } catch (error) {
-            console.log(error);
-        }
-    }, []);
-
-    const onSubmit = (data: CategoryFormData) => {
+    const onSubmit = async (data: CategoryFormData) => {
 
         if (!data) {
             return;
@@ -47,19 +39,27 @@ export default function CategoryForm() {
         });
 
         try {
-            const createNewCategory = async () => {
-                const formDto: IFormData = {
-                    name: data.name,
-                    description: data.description,
-                    parentId: data.parent_id,
-                    images: files
-                };
+            const formDto: IFormData = {
+                name: data.name,
+                description: data.description,
+                parentId: data.parent_id,
+                images: files
+            };
 
-                await createCategory(formDto);
-            }
+            dispatch(enableLoading());
 
-            createNewCategory();
-            navigate('/');
+            createCategoryMutation.mutate(formDto, {
+                onSuccess: (data: any) => {
+                    dispatch(disableLoading());
+                    notify(data.message, "success");
+                    queryClient.invalidateQueries({ queryKey: ["categories"] });
+                    navigate('/');
+                },
+                onError: (error: any) => {
+                    dispatch(disableLoading());
+                    console.error("❌ Error:", error);
+                },
+            })
         } catch (error) {
             const err = error as any;
             console.log(err.response?.data.message);
@@ -105,10 +105,10 @@ export default function CategoryForm() {
             )}
 
             {/* Parent category optional */}
-            {categories.length > 0 && (
+            {categories && categories.length > 0 && (
                 <select {...register("parent_id")} className="border p-2 rounded">
                     <option value="">Select Parent Category</option>
-                    {categories.map((cat) => (
+                    {categories.map((cat: any) => (
                         <option key={cat.id} value={cat.id}>
                             {cat.name}
                         </option>
