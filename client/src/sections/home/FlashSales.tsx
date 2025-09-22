@@ -1,7 +1,7 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBolt, faAngleRight, faCheck } from "@fortawesome/free-solid-svg-icons";
 import Countdown from "@components/countdown/Countdown";
-import { Link } from "react-router";
+import { Link } from "react-router-dom";
 
 export default () => {
     return (

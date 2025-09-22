@@ -2,8 +2,8 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEnvelope, faEye } from "@fortawesome/free-solid-svg-icons";
 import { useEffect, useState } from "react";
-import { Link } from "react-router";
-import { useAppDispatch, useAppSelector } from "hooks";
+import { Link } from "react-router-dom";
+import { useAppDispatch } from "hooks";
 import { disableLoading, enableLoading } from "@reducers/loading";
 import { notify } from "@utils/toast";
 import { useForm } from "react-hook-form";

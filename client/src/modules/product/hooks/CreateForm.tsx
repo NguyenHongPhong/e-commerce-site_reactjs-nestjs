@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
-import { CategoryDto } from "@uiTypes/dto/category.dto";
-import { getCategories } from "@api/category";
 import Tags from "@components/tag/Tag";
 import { FormCreateProductValues } from "@uiTypes/ui";
 import { useCreateProductMutation, } from "../queries";
-import { useAppDispatch, useAppSelector } from "hooks";
+import { useAppDispatch } from "hooks";
 import { disableLoading, enableLoading } from "@reducers/loading";
 import { notify } from "@utils/toast";
+import { useQueryAllCategory } from "@modules/category/queries";
 
 export default function ProductForm() {
     const {
@@ -29,25 +28,13 @@ export default function ProductForm() {
             imgs: []
         },
     });
+    const { data: categories } = useQueryAllCategory();
 
     const dispatch = useAppDispatch();
     const createProductMutation = useCreateProductMutation();
-    const [categories, setCategories] = useState<CategoryDto[]>([]);
     const [previews, setPreviews] = useState<string[]>([]);
 
     const imgs = watch("imgs");
-
-    useEffect(() => {
-        async function fetchCategories() {
-            try {
-                const res = await getCategories();
-                setCategories(res.data);
-            } catch (error) {
-                console.log(error);
-            }
-        }
-        fetchCategories();
-    }, []);
 
     const handleImagesChange = (files: FileList | null) => {
         if (!files) return;
@@ -140,13 +127,13 @@ export default function ProductForm() {
 
                 <label className="flex-col flex">
                     <span className="text-sm font-medium">Categories</span>
-                    {categories.length > 0 && (
+                    {categories && categories.length > 0 && (
                         <select
                             {...register("category", { required: "Category is required" })}
                             className="mt-2 block w-full rounded-lg border p-2 h-11"
                         >
                             <option value="">Select Category</option>
-                            {categories.map((cat) => (
+                            {categories.map((cat: any) => (
                                 <option key={cat.id} value={cat.id}>
                                     {cat.name}
                                 </option>

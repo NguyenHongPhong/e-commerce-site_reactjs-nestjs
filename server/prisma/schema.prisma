@@ -63,7 +63,7 @@ model Category {
   id          Int               @id @default(autoincrement())
   name        String
   slug        String
-  description String?
+  description String?           @db.Text
   parent_id   Int?
   is_active   Boolean           @default(true)
   updatedAt   DateTime          @updatedAt
@@ -145,7 +145,7 @@ model Rate {
 
   star_rating Int?
 
-  product     Product? @relation(fields: [product_id], references: [id], onDelete: Cascade)
+  product   Product? @relation(fields: [product_id], references: [id], onDelete: Cascade)
 }
 
 

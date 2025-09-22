@@ -17,6 +17,9 @@ export class CategoryRepository {
             include: {
                 images: true,
             },
+            orderBy: {
+                createAt: "desc", // mới nhất trước
+            },
         });
         return categories;
     };

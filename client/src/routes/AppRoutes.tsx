@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router";
+import { Routes, Route } from "react-router-dom";
 import MainLayout from "../layouts/MainLayout";
 import HomePage from "../pages/home/HomePage";
 import AboutPage from "../pages/about/AboutPage";
@@ -12,7 +12,24 @@ import ResetPassword from "../pages/recovery/ResetPassword";
 import CreatePage from "@pages/category/CreatePage";
 import ProductPage from "@pages/product/index";
 import { ProtectedRoute } from "@components/protectedRoute";
+import { useDispatch } from "react-redux";
+import { authenticated, unauthenticated } from "@reducers/auth";
+import { useEffect } from "react";
+import { useGetProfileQuery } from "@modules/auth/queries";
 function AppRoutes() {
+
+    const { data: profile, isLoading: isLoadingProfile, error: profileError } = useGetProfileQuery();
+    const dispatch = useDispatch();
+
+    useEffect(() => {
+        if (profile) {
+            dispatch(authenticated(profile));
+        } else {
+            dispatch(unauthenticated());
+        }
+
+    }, [profile]);
+
     return (
         <Routes>
             <Route element={<MainLayout />}>

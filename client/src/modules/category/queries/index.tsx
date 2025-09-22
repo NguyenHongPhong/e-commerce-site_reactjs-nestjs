@@ -11,7 +11,7 @@ export const useCreateCategoryMutation = () => {
     });
 };
 
-export const useGetAllCategoryMutation = () => {
+export const useQueryAllCategory = () => {
     return useQuery({
         queryKey: ['categories'],
         queryFn: getCategories,

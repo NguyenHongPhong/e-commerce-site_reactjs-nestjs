@@ -1,4 +1,4 @@
-import { data } from 'react-router';
+import { data } from 'react-router-dom';
 import api from ".";
 import { IFormData, toFormData } from "@uiTypes/dto/category.dto";
 const API_BASE = '/categories';

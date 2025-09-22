@@ -9,7 +9,7 @@ import { notify } from "@utils/toast";
 import { useForm } from "react-hook-form";
 import { FormValues } from "@uiTypes/ui";
 import { AxiosError } from 'axios';
-import { Link, useSearchParams } from "react-router";
+import { Link, useSearchParams } from "react-router-dom";
 import { useLocation } from 'react-router-dom';
 
 const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;

@@ -10,3 +10,6 @@ export const refreshToken = () => {
     return api.post(API_BASE + "/refresh", {});
 }
 
+export const logout = () => {
+    return api.post(API_BASE + "/logout", {});
+}
