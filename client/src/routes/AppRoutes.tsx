@@ -16,10 +16,17 @@ import { useDispatch } from "react-redux";
 import { authenticated, unauthenticated } from "@reducers/auth";
 import { useEffect } from "react";
 import { useGetProfileQuery } from "@modules/auth/queries";
+import ShopperLayout from "@layouts/ShopperLayout";
+import { RegisterShpperPage } from "@pages/shopper/register";
 function AppRoutes() {
-
-    const { data: profile, isLoading: isLoadingProfile, error: profileError } = useGetProfileQuery();
+    const { data: profile, error, isError, isLoading } = useGetProfileQuery();
     const dispatch = useDispatch();
+
+    useEffect(() => {
+        if (isError) {
+            dispatch(unauthenticated());
+        }
+    }, [isError]);
 
     useEffect(() => {
         if (profile) {
@@ -29,39 +36,52 @@ function AppRoutes() {
 
     return (
         <Routes>
+            {/* Public routes */}
             <Route element={<MainLayout />}>
                 <Route path="/" element={<HomePage />} />
                 <Route path="/about" element={<AboutPage />} />
             </Route>
+
+            {/* Auth routes */}
             <Route element={<AuthLayout />}>
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/register" element={<RegisterPage />} />
             </Route>
 
+            {/* Recovery routes */}
             <Route element={<RecoverLayout />}>
                 <Route path="/recovery-password" element={<RecoveryPassword />} />
                 <Route path="/verify-otp" element={<VerifyOTP />} />
                 <Route path="/reset-password" element={<ResetPassword />} />
             </Route>
 
-            <Route path="/category/create" element={
-                <AuthenticationUser>
-                    <CreatePage />
-                </AuthenticationUser>} />
-
-            <Route path="/products/create"
+            {/* Shopper routes */}
+            <Route
+                path="/shopper"
                 element={
                     <AuthenticationUser>
-                        <ProductPage />
-                    </AuthenticationUser>} />
+                        <ShopperLayout />
+                    </AuthenticationUser>
+                }
+            >
+                <Route path="register" element={<RegisterShpperPage />} />
 
-            <Route path="/shopper/register"
-                element={
-                    <AuthenticationUser>
-                        <ProductPage />
-                    </AuthenticationUser>} />
+                {/* Category routes */}
+                <Route path="category">
+                    {/* <Route index element={<CategoryList />} /> */}
+                    <Route path="create" element={<CreatePage />} />
+                    {/* <Route path="edit/:id" element={<CategoryEdit />} /> */}
+                </Route>
+
+                {/* Product routes */}
+                <Route path="product">
+                    {/* <Route index element={<ProductList />} /> */}
+                    <Route path="create" element={<ProductPage />} />
+                    {/* <Route path="edit/:id" element={<ProductEdit />} /> */}
+                </Route>
+            </Route>
         </Routes>
-    )
+    );
 }
 
 export default AppRoutes;

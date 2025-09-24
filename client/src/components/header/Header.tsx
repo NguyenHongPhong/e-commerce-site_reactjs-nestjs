@@ -52,7 +52,7 @@ function Header() {
                     <div className=" relative group hover:cursor-pointer after:content-['']
                     after:w-full after:h-6 after:absolute">
                         <div className="items-center justify-end flex">
-                            <img className="w-10 h-10 rounded-full mr-2" src={user?.portrait || ""} alt="" />
+                            <img className="w-10 h-10 rounded-full mr-2" src={user?.portrait || `/public/ui/images/defaut-portrait.jfif`} alt="" />
                             <span className="font-semibold">{user.first_name}</span>
                             <FontAwesomeIcon icon={faCaretDown} />
                         </div>
