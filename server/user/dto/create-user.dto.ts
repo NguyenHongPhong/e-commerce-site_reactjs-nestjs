@@ -55,3 +55,11 @@ export class CreateUserDto {
     @IsDateString()
     last_login_at?: string;
 }
+
+export class createUserRole {
+    @IsNumber()
+    role_id: number = 1;
+
+    @IsString()
+    user_id!: string;
+}

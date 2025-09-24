@@ -11,6 +11,9 @@ export class CreateCategoryDto {
     @IsOptional()
     @IsString()
     parentId?: string;
+
+    @IsString()
+    id_shop!: string
 }
 
 

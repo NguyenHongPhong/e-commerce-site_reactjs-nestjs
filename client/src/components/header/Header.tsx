@@ -1,16 +1,7 @@
 import { Link } from "react-router-dom";
-import { getProfile } from "../../api/user";
-import { useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../hooks";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCaretDown } from "@fortawesome/free-solid-svg-icons"
-import { useSessionExpiryCountdown } from "../../features/auth/hooks/useSessionExpiryCountdown";
-import { refreshToken } from "../../api/auth";
-import { IProfileUserDto } from "../../types/dto/user.dto";
-import { useIdle } from "../../features/ui/hooks/useIdle";
-import { useNavigate } from "react-router-dom";
-import type { AxiosError } from "axios";
-import { ErrorResponse } from "../../types/ui";
 import { authenticated, unauthenticated } from "@reducers/auth";
 import { useLogoutmutation } from "@modules/auth/queries";
 import { notify } from "@utils/toast";
@@ -18,9 +9,6 @@ function Header() {
     // const { secondsLeft, isExpired, timeUp } = useSessionExpiryCountdown("time-ending");
     const user = useAppSelector((s) => s.auth.user);
     const status = useAppSelector((s) => s.auth.status);
-    const [idle, setIdle] = useState(0);
-    const isIdle = useIdle(idle);
-    const [showPrompt, setShowPrompt] = useState(false);
     const dispatch = useAppDispatch();
     const { mutate: logout, data: message, isSuccess, error } = useLogoutmutation();
 
@@ -29,71 +17,6 @@ function Header() {
         logout(); // gọi API logout
         notify(message, "success");
     };
-    // //Caculating expire time to check if user is inactive
-    // useEffect(()=> {
-    //     const expiresIn = sessionStorage.getItem("time-ending");
-    //     if(expiresIn) {
-    //             const convertData = JSON.parse(expiresIn);
-    //             const rs = ((convertData.expiresIn ?? 0) * 1000)-5000;
-    //             setIdle(rs);
-    //     }
-
-    // }, []);
-
-    // //Call API when accessToken expired
-    // useEffect(() => {
-    //     if (!isExpired) return;
-    //     if (timeUp && !isIdle) {
-    //         setTimeout(() => {
-    //             const fetchProfileAsTokenExpired = async () => {
-    //                 try {
-    //                     const res = await getProfile();
-    //                 } catch (e: any) {
-    //                     const err = e as AxiosError;
-    //                     const status = err?.response?.status;
-
-    //                     if (status !== 401) {
-    //                         return;
-    //                     }
-    //                 }
-
-    //                 try {
-    //                     const result = await refreshToken();
-    //                     const newTimer = { expiresIn: result.data.expiresIn, serverNow: result.data.serverNow };
-    //                     sessionStorage.setItem("time-ending", JSON.stringify(
-    //                         newTimer
-    //                     ));
-
-    //                     window.dispatchEvent(new CustomEvent("token:updated", { detail: newTimer }));
-
-    //                     const res = await getProfile();
-    //                     const user = res.data;
-    //                     setProfile(user);
-    //                 } catch (e) {
-    //                     const err = e as AxiosError<ErrorResponse>;
-    //                     const status = err?.response?.status;
-    //                     // Treat 401/403/410 as “must re-login”
-    //                     if (status === 401 || status === 403 || status === 410) {
-    //                         sessionStorage.removeItem("time-ending");
-    //                         console.log(err);
-    //                         setTimeout(() => {
-    //                             navigate("/login");
-    //                         }, 5000);
-    //                         return;
-    //                     }
-    //                 }
-    //             };
-    //             fetchProfileAsTokenExpired();
-    //         }, 2000);
-    //     }
-    // }, [isExpired, isIdle]);
-
-    // useEffect(()=> {
-    //     if(isIdle) {
-    //        console.log("User is inactive");
-    //     }
-    // }, [isIdle])
-
 
 
     return (<header>
@@ -134,18 +57,19 @@ function Header() {
                             <FontAwesomeIcon icon={faCaretDown} />
                         </div>
                         <div className="w-0 h-0 border-l-transparent border-r-transparent
-                        border-b-[#e5e5e5] border-l-[12px] border-r-[12px] border-b-[15px]
-                        absolute bottom-0 right-20 translate-y-2 opacity-0 pointer-events-none
+                        border-b-[#f0ecec] border-l-[12px] border-r-[12px] border-b-[15px]
+                        absolute bottom-0 left-1/2 translate-y-2 opacity-0 pointer-events-none
                         transition-opacity duration-300 ease-out group-hover:opacity-100 group-hover:pointer-events-auto
                         "></div>
 
                         <div className="absolute bottom-0 right-0 opacity-0 pointer-events-none
                                         transition-opacity duration-300 ease-out group-hover:opacity-100 
-                                        group-hover:pointer-events-auto">
-                            <ul className="z-10 relative text-base translate-y-40 bg-[#e5e5e5] rounded-2xl
+                                        group-hover:pointer-events-auto translate-y-48 w-44 z-20">
+                            <ul className="z-10 relative text-base bg-[#f0ecec] rounded-2xl
                                             p-4 gap-2.5 flex flex-col">
-                                <li className="hover:underline">Personal information</li>
+                                <li className="hover:underline">Profile</li>
                                 <li className="hover:underline">Historical</li>
+                                <li className="hover:underline"><Link to={""}>Become Shopper</Link></li>
                                 <li className="hover:underline">Setting</li>
                                 <li className="hover:underline" onClick={handleLogout}>Log out</li>
                             </ul>

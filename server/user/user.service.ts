@@ -1,13 +1,12 @@
 import { Injectable, ConflictException, NotFoundException, InternalServerErrorException } from '@nestjs/common';
 import { UserRepository } from './user.repository';
-import { CreateUserDto } from './dto/create-user.dto';
+import { CreateUserDto, createUserRole } from './dto';
 import { USER_STATUS } from '../common/constants/app.constant';
 import * as bcrypt from 'bcrypt';
 import * as jwt from 'jsonwebtoken';
 import { ConfigService } from '@nestjs/config';
 import { IResetPasswordUserDto } from './dto/reset-password-user.dto';
-
-
+import { USER_ROLES } from '../common/constants/app.constant';
 @Injectable()
 export class UserService {
     private readonly saltRounds = 10;
@@ -33,7 +32,7 @@ export class UserService {
 
     generateRefreshToken(payload: any) {
         return jwt.sign(payload, this.jwtRefreshSecret, {
-            expiresIn: '7d', // Refresh token sống 7 ngày
+            expiresIn: '1d', // Refresh token sống 1 ngày
         });
     }
     async hashPassword(password: string): Promise<string> {
@@ -54,7 +53,12 @@ export class UserService {
         };
 
         const addedUser = await this.userRepository.createUser(defaultData);
-        return addedUser;
+        const userRole: createUserRole = { user_id: addedUser.id, role_id: USER_ROLES.user };
+        await this.userRepository.insertUserRole(userRole);
+        return {
+            status: true,
+            message: 'Register successfully !!!',
+        };
     }
 
     findById(id: string) {

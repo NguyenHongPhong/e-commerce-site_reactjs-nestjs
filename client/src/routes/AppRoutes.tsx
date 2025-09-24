@@ -11,7 +11,7 @@ import VerifyOTP from "../pages/recovery/VerifyOTP";
 import ResetPassword from "../pages/recovery/ResetPassword";
 import CreatePage from "@pages/category/CreatePage";
 import ProductPage from "@pages/product/index";
-import { ProtectedRoute } from "@components/protectedRoute";
+import { AuthenticationUser } from "@components/protectedRoute/AuthenticationUser";
 import { useDispatch } from "react-redux";
 import { authenticated, unauthenticated } from "@reducers/auth";
 import { useEffect } from "react";
@@ -24,10 +24,7 @@ function AppRoutes() {
     useEffect(() => {
         if (profile) {
             dispatch(authenticated(profile));
-        } else {
-            dispatch(unauthenticated());
         }
-
     }, [profile]);
 
     return (
@@ -47,16 +44,22 @@ function AppRoutes() {
                 <Route path="/reset-password" element={<ResetPassword />} />
             </Route>
 
-            <Route path="/create-category" element={
-                <ProtectedRoute>
+            <Route path="/category/create" element={
+                <AuthenticationUser>
                     <CreatePage />
-                </ProtectedRoute>} />
+                </AuthenticationUser>} />
 
             <Route path="/products/create"
                 element={
-                    <ProtectedRoute>
+                    <AuthenticationUser>
                         <ProductPage />
-                    </ProtectedRoute>} />
+                    </AuthenticationUser>} />
+
+            <Route path="/shopper/register"
+                element={
+                    <AuthenticationUser>
+                        <ProductPage />
+                    </AuthenticationUser>} />
         </Routes>
     )
 }

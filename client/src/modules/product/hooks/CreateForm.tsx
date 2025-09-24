@@ -7,6 +7,8 @@ import { useAppDispatch } from "hooks";
 import { disableLoading, enableLoading } from "@reducers/loading";
 import { notify } from "@utils/toast";
 import { useQueryAllCategory } from "@modules/category/queries";
+import { useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
 
 export default function ProductForm() {
     const {
@@ -28,6 +30,8 @@ export default function ProductForm() {
             imgs: []
         },
     });
+    const navigate = useNavigate();
+    const queryClient = useQueryClient();
     const { data: categories } = useQueryAllCategory();
 
     const dispatch = useAppDispatch();
@@ -62,6 +66,8 @@ export default function ProductForm() {
             onSuccess: (data: any) => {
                 dispatch(disableLoading());
                 notify(data.message, "success");
+                queryClient.invalidateQueries({ queryKey: ["products"] });
+                navigate("/");
             },
             onError: (error: any) => {
                 dispatch(disableLoading());

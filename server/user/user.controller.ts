@@ -10,20 +10,9 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 export class UserController {
     constructor(private readonly userService: UserService) { }
 
-    @Post()
-    async create(@Body() createUserDto: CreateUserDto, @Res() res: Response) {
-        try {
-            await this.userService.create(createUserDto);
-            return res.json({
-                message: 'Register successfully !!!'
-            });
-
-        } catch (error) {
-            return res.json({
-                message: 'Register failed !!!'
-            });
-
-        }
+    @Post("/create")
+    async create(@Body() createUserDto: CreateUserDto) {
+        return await this.userService.create(createUserDto);
     }
 
 

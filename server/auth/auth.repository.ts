@@ -1,6 +1,6 @@
 import { PrismaService } from '../prisma/prisma.service';
 import { Injectable } from '@nestjs/common';
-
+import { createUserRole } from '@/user/dto';
 @Injectable()
 export class AuthRepository {
     constructor(private readonly prismaClient: PrismaService) { };
@@ -11,4 +11,9 @@ export class AuthRepository {
             }
         });
     }
+
+    async insertUserRole(data: createUserRole) {
+        return this.prismaClient.user_Roles.create({ data });
+    }
+
 }

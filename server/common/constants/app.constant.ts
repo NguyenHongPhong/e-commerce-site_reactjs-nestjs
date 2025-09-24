@@ -12,3 +12,9 @@ export const ROLES = {
     customer: 3,
     guest: 4
 }
+
+export const USER_ROLES = {
+    user: 1,
+    seller: 2,
+    admin: 3
+}

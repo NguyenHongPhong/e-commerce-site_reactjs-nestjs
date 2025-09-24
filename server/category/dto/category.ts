@@ -1,10 +1,4 @@
 import { IsBoolean, IsInt, IsOptional, IsString } from 'class-validator';
-export type categoryDto = {
-    name: string;
-    description: string;
-    parentId?: string | undefined;
-}
-
 
 export class CreateCategoryDto {
     @IsString()
@@ -24,5 +18,8 @@ export class CreateCategoryDto {
     @IsOptional()
     @IsBoolean()
     is_active?: boolean;
+
+    @IsString()
+    id_shop!: string; // <-- thêm field này
 }
 

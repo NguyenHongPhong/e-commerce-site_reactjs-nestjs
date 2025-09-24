@@ -2,7 +2,6 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUser, faEnvelope, faEye, faPhone } from "@fortawesome/free-solid-svg-icons";
 import { useEffect, useState } from "react";
 import { IUserDto } from "@uiTypes/dto/user.dto";
-import { createUser } from "@api/user";
 import { useAppDispatch } from "hooks";
 import { disableLoading, enableLoading } from "@reducers/loading";
 import { notify } from "@utils/toast";
@@ -11,16 +10,18 @@ import { FormValues } from "@uiTypes/ui";
 import { AxiosError } from 'axios';
 import { Link, useSearchParams } from "react-router-dom";
 import { useLocation } from 'react-router-dom';
-
+import { useCreateUserMutation } from "../queries";
 const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 const redirectUri = import.meta.env.VITE_GOOGLE_REDIRECT_URI;
 const scope = import.meta.env.VITE_GOOGLE_SCOPE;
 const authUrl = import.meta.env.VITE_GOOGLE_AUTH_URL;
-
+import { useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
 
 export default function () {
     const location = useLocation();
     const [params] = useSearchParams(location.search);
+    const navigate = useNavigate();
     useEffect(() => {
         const message = params.get('message');
         const err = params.get('error');
@@ -49,6 +50,7 @@ export default function () {
     const dispatch = useAppDispatch();
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    const createUserMutation = useCreateUserMutation();
 
     const onSubmit = async (data: FormValues) => {
         const newUser: IUserDto = {
@@ -60,22 +62,24 @@ export default function () {
             phone_number: data.phone_number as string
         }
 
-
-        try {
-            dispatch(enableLoading());
-            const res = await createUser(newUser);
-            reset();
-            setTimeout(() => {
+        dispatch(enableLoading());
+        createUserMutation.mutate(newUser, {
+            onSuccess: (data: any) => {
                 dispatch(disableLoading());
-                notify(res.data.message, "success");
-            }, 2000);
-        } catch (err) {
-            const error = err as AxiosError;
-            const message = (error.response?.data as any)?.message;
-            console.error("Error creating user:", message);
-            dispatch(disableLoading());
-            notify(message, "error");
-        }
+                reset();
+                notify(data.message, "success");
+                setTimeout(() => {
+                    navigate('/');
+                }, 1000)
+            },
+            onError: (err: any) => {
+                const error = err as AxiosError;
+                const message = (error.response?.data as any)?.message;
+                console.error("Error creating user:", message);
+                dispatch(disableLoading());
+                notify(message, "error");
+            },
+        })
     };
 
     return (

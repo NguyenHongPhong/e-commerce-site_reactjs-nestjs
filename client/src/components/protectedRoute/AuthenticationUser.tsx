@@ -4,7 +4,7 @@ import { useAppSelector } from "hooks";
 import { notify } from "@utils/toast";
 import { useRef } from "react";
 
-export const ProtectedRoute: React.FC<{ children: JSX.Element }> = ({ children }) => {
+export const AuthenticationUser: React.FC<{ children: JSX.Element }> = ({ children }) => {
     const isAuthenticated = useAppSelector((state) => state.auth.user);
     const isLoading = useAppSelector((state) => state.auth.status);
     const messageRef = useRef(false);
@@ -12,7 +12,6 @@ export const ProtectedRoute: React.FC<{ children: JSX.Element }> = ({ children }
     if (isLoading === "loading") {
         return <div>Loading......</div>;
     }
-
 
     useEffect(() => {
         if (!isAuthenticated && !messageRef.current) {
