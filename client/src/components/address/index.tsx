@@ -1,7 +1,8 @@
 import { useAddress } from "@features/ui/hooks/useAddrress";
 import { IAddress } from "@uiTypes/ui";
+import { useEffect } from "react";
 
-export default function AddressComponent() {
+export default function AddressComponent({ value, onChange }: { value: IAddress; onChange: (val: IAddress) => void }) {
     const {
         provinces,
         districts,
@@ -19,7 +20,11 @@ export default function AddressComponent() {
         loadingDistricts,
         loadingWards,
         error,
-    } = useAddress();
+    } = useAddress({ value, onChange });
+
+    useEffect(() => {
+        onChange({ ...value, street: fullAddress() });
+    }, [street]);
 
     return (
         <div>

@@ -103,9 +103,18 @@ export interface IContact {
 }
 
 export type IAddress = {
-    province?: string,
-    district?: string,
-    ward?: string,
-    fullAdress?: string
-    onChange: () => void
+    province: string;
+    district: string;
+    ward: string;
+    street: string;
+};
+
+export type IFormShopperRegister = {
+    name: string,
+    logo: File,
+    banner: File,
+    description: string,
+    contactShopper: string,
+    contactRegistered: boolean,
+    address: IAddress
 }

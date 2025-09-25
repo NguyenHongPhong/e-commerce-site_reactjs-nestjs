@@ -14,25 +14,23 @@ import { IContact } from "@uiTypes/ui";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowsRotate } from '@fortawesome/free-solid-svg-icons';
 import ShareLocationButton from "@components/shareLocation";
+import { IFormShopperRegister } from "@uiTypes/ui";
 export default function () {
     const profile = useAppSelector(state => state.auth.user);
-    const {
-        register,
-        control,
-        handleSubmit,
-        formState: { errors },
-        setValue,
-        watch,
-    } = useForm<FormCreateProductValues>({
+    const { control, register, handleSubmit } = useForm<IFormShopperRegister>({
         defaultValues: {
-            title: "",
+            name: "",
+            logo: undefined,
+            banner: undefined,
             description: "",
-            price: 0,
-            category: 0,
-            colors: [],
-            materials: [],
-            sizes: [],
-            imgs: []
+            contactShopper: "",
+            contactRegistered: false,
+            address: {
+                province: "",
+                district: "",
+                ward: "",
+                street: "",
+            },
         },
     });
     const navigate = useNavigate();
@@ -67,42 +65,20 @@ export default function () {
     };
 
     const handleLogoChange = (files: FileList | null) => {
-        if (!files) return;
+        if (!files || files.length === 0) return;
         const imgPreview = URL.createObjectURL(files[0]);
         setLogoPreview(imgPreview);
     };
 
     const handleBannerChange = (files: FileList | null) => {
-        if (!files) return;
+        if (!files || files.length === 0) return;
         const imgPreview = URL.createObjectURL(files[0]);
         setBannerPreview(imgPreview);
     };
 
-    const submit = (data: FormCreateProductValues) => {
-        const formData = new FormData();
-        formData.append("title", data.title);
-        formData.append("description", data.description);
-        formData.append("price", String(data.price));
-        formData.append("category", String(data.category));
-        data.imgs.forEach((file) => formData.append("imgs", file));
-        data.colors.forEach((color) => formData.append("colors", color));
-        data.materials.forEach((material) => formData.append("materials", material));
-        data.sizes.forEach((size) => formData.append("sizes", size));
-
-        dispatch(enableLoading());
-
-        createProductMutation.mutate(formData, {
-            onSuccess: (data: any) => {
-                dispatch(disableLoading());
-                notify(data.message, "success");
-                queryClient.invalidateQueries({ queryKey: ["products"] });
-                navigate("/");
-            },
-            onError: (error: any) => {
-                dispatch(disableLoading());
-                console.error("❌ Error:", error);
-            },
-        });
+    const submit = (data: IFormShopperRegister) => {
+        if (!data) return;
+        console.log(data);
     };
 
     return (
@@ -116,7 +92,7 @@ export default function () {
                 <span className="text-sm font-medium">Name shop</span>
                 <input
                     className="mt-1 block w-full rounded-lg border p-2"
-                    name="name-shop"
+                    {...register("name")}
                 />
             </label>
 
@@ -126,7 +102,7 @@ export default function () {
                 <input
                     type="file"
                     className="mt-1 block w-full rounded-lg border p-2 mb-2"
-                    name="logo"
+                    {...register("logo")}
                     onChange={(e) => handleLogoChange(e.target.files)}
                 />
 
@@ -151,7 +127,7 @@ export default function () {
                 <input
                     type="file"
                     className="mt-1 block w-full rounded-lg border p-2 mb-2"
-                    name="banner"
+                    {...register("banner")}
                     onChange={(e) => handleBannerChange(e.target.files)}
                 />
 
@@ -169,7 +145,7 @@ export default function () {
             {/* description */}
             <label className="mb-3 flex flex-col ">
                 <span className="text-sm font-medium">Description</span>
-                <textarea className="border rounded-lg p-2" name="description"></textarea>
+                <textarea className="border rounded-lg p-2" {...register("description")} ></textarea>
             </label>
 
             {/* contact */}
@@ -178,8 +154,8 @@ export default function () {
                 <input
                     type="text"
                     className={`mt-1 block w-full rounded-lg border p-2 ${isContact?.contactRegistered ? `border-black/15 cursor-not-allowed` : ``}`}
-                    name="contact"
-                    value={isContact?.newContact}
+                    {...register("contactShopper")}
+                    value={isContact?.newContact || ""}
                     onChange={handleTextChange}
                     disabled={isContact?.contactRegistered} // disable nếu đã chọn radio
                 />
@@ -187,11 +163,13 @@ export default function () {
                 <div className="flex items-center">
                     <div className="flex items-center">
                         <input
+                            {...register("contactRegistered")}
                             type="radio"
-                            checked={isContact?.contactRegistered}
+                            checked={isContact?.contactRegistered || false}
                             onChange={handleRadioChange}
                             disabled={!!isContact?.newContact} // disable nếu đã nhập text
                             className={` ${!!isContact?.newContact ? `opacity-80 cursor-not-allowed` : ``}`}
+                            name="contactRegistered"
                         />
                     </div>
                     <span className="mx-2">{profile?.phone_number}</span>
@@ -199,7 +177,13 @@ export default function () {
                 </div>
             </label>
 
-            <AddressComponent />
+            <Controller
+                name="address"
+                control={control}
+                render={({ field }) => (
+                    <AddressComponent value={field.value} onChange={field.onChange} />
+                )}
+            />
 
             {/* Buttons */}
             <div className="flex gap-3 justify-between">

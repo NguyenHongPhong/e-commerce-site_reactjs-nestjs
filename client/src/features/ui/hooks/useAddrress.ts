@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-
+import { IAddress } from "@uiTypes/ui";
 const API_BASE = "https://provinces.open-api.vn/api/v1";
 
 // Type definitions
@@ -29,7 +29,7 @@ export interface Province {
     districts?: District[];
 }
 
-export function useAddress() {
+export function useAddress({ value, onChange }: { value: IAddress; onChange: (val: IAddress) => void }) {
     const [provinces, setProvinces] = useState<Province[]>([]);
     const [districts, setDistricts] = useState<District[]>([]);
     const [wards, setWards] = useState<Ward[]>([]);
@@ -120,14 +120,20 @@ export function useAddress() {
     // 4. Hàm thiết lập province / district / ward từ chọn user
     const selectProvince = (provCode: number) => {
         const prov = provinces.find((p) => p.code === provCode) || null;
+        const nameProvince = provinces.find(x => x.code === provCode)?.name || "";
+        onChange({ ...value, province: nameProvince || "" })
         setProvince(prov);
     };
     const selectDistrict = (distCode: number) => {
         const dist = districts.find((d) => d.code === distCode) || null;
+        const nameDistrict = districts.find(x => x.code === distCode)?.name || "";
+        onChange({ ...value, district: nameDistrict || "" });
         setDistrict(dist);
     };
     const selectWard = (wardCode: number) => {
         const w = wards.find((w) => w.code === wardCode) || null;
+        const nameWard = wards.find(x => x.code === wardCode)?.name || "";
+        onChange({ ...value, ward: nameWard || "" });
         setWard(w);
     };
 
