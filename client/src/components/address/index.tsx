@@ -30,7 +30,7 @@ export default function AddressComponent({ value, onChange }: { value: IAddress;
         <div>
             {/* Province / City */}
             <div className="mb-3">
-                <label className="block mb-1">Province / City:</label>
+                <label className="block mb-1 text-md font-semibold">Province / City:</label>
                 <select
                     className="w-full border rounded p-2"
                     value={province?.code || ""}
@@ -49,7 +49,7 @@ export default function AddressComponent({ value, onChange }: { value: IAddress;
             {/* District */}
             {province && (
                 <div className="mb-3">
-                    <label className="block mb-1">District:</label>
+                    <label className="block mb-1 text-md font-semibold">District:</label>
                     <select
                         className="w-full border rounded p-2"
                         value={district?.code || ""}
@@ -69,7 +69,7 @@ export default function AddressComponent({ value, onChange }: { value: IAddress;
             {/* Ward / Commune */}
             {district && (
                 <div className="mb-3">
-                    <label className="block mb-1">Ward / Commune:</label>
+                    <label className="block mb-1 text-md font-semibold">Ward / Commune:</label>
                     <select
                         className="w-full border rounded p-2"
                         value={ward?.code || ""}
@@ -89,7 +89,7 @@ export default function AddressComponent({ value, onChange }: { value: IAddress;
             {/* Street & House Number */}
             {ward && (
                 <div className="mb-3">
-                    <label className="block mb-1">Street & House Number:</label>
+                    <label className="block mb-1 text-md font-semibold">Street & House Number:</label>
                     <input
                         type="text"
                         className="w-full border rounded p-2"
@@ -102,7 +102,7 @@ export default function AddressComponent({ value, onChange }: { value: IAddress;
             {/* Full Address */}
             {street && (
                 <div className="font-semibold">
-                    Address: {fullAddress()}
+                    Full address: {fullAddress()}
                 </div>
             )}
         </div>

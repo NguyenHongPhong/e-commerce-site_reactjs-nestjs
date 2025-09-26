@@ -109,12 +109,8 @@ export type IAddress = {
     street: string;
 };
 
-export type IFormShopperRegister = {
-    name: string,
-    logo: File,
-    banner: File,
-    description: string,
-    contactShopper: string,
-    contactRegistered: boolean,
-    address: IAddress
-}
+export type ILocation = {
+    latitude: number,
+    longitude: number
+};
+

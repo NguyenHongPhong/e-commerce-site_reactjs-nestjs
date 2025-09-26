@@ -1,23 +1,24 @@
 import React, { useState, useEffect } from "react";
-import { useForm, Controller } from "react-hook-form";
-import { FormCreateProductValues } from "@uiTypes/ui";
-import { useCreateProductMutation } from "@modules/product/queries";
+import { useForm, Controller, useWatch } from "react-hook-form";
 import { useAppDispatch } from "hooks";
 import { disableLoading, enableLoading } from "@reducers/loading";
 import { notify } from "@utils/toast";
-import { useQueryAllCategory } from "@modules/category/queries";
 import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import AddressComponent from "@components/address";
 import { useAppSelector } from "hooks";
-import { IContact } from "@uiTypes/ui";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowsRotate } from '@fortawesome/free-solid-svg-icons';
 import ShareLocationButton from "@components/shareLocation";
-import { IFormShopperRegister } from "@uiTypes/ui";
+import { ShopperRegisterForm, shopperRegisterSchema } from "schema/shopperRegister.schema";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { faCheckDouble } from "@fortawesome/free-solid-svg-icons";
+import { ShopperDTO } from "@uiTypes/dto/shopper.dto";
+import { useRegisterShopperMutation } from "../queries";
 export default function () {
     const profile = useAppSelector(state => state.auth.user);
-    const { control, register, handleSubmit } = useForm<IFormShopperRegister>({
+    const { control, register, handleSubmit, setValue, formState: { errors }, watch, trigger } = useForm<ShopperRegisterForm>({
+        resolver: zodResolver(shopperRegisterSchema),
         defaultValues: {
             name: "",
             logo: undefined,
@@ -31,80 +32,133 @@ export default function () {
                 ward: "",
                 street: "",
             },
+            location: {
+                latitude: 0,
+                longitude: 0
+            }
         },
     });
     const navigate = useNavigate();
     const queryClient = useQueryClient();
 
     const dispatch = useAppDispatch();
-    const createProductMutation = useCreateProductMutation();
     const [logoPreview, setLogoPreview] = useState<string>();
     const [bannerPreview, setBannerPreview] = useState<string>();
-    const [isContact, setIsContact] = useState<IContact>();
-    const initialState: IContact = { newContact: "", contactRegistered: false };
     const [spinning, setSpinning] = useState(false);
+    const contactShopper = watch("contactShopper");
+    const contactRegistered = watch("contactRegistered") || false;
+    const province = watch("address.province");
+    const district = watch("address.district");
+    const ward = watch("address.ward");
+    const registerShopperMutation = useRegisterShopperMutation();
+
+    const [latitude, longitude] = useWatch({
+        control,
+        name: [
+            "location.latitude",
+            "location.longitude",
+        ],
+    });
 
     const handleTextChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setIsContact({
-            newContact: e.target.value,
-            contactRegistered: false, // khi nhập text thì tắt radio
-        });
+        setValue("contactShopper", e.target.value, { shouldValidate: true });
+        setValue("contactRegistered", false, { shouldValidate: true });
     };
 
     const handleRefreshContact = () => {
-        setIsContact(initialState);
+        setValue("contactShopper", "", { shouldValidate: true });
+        setValue("contactRegistered", false, { shouldValidate: true });
         setSpinning(true);
         setTimeout(() => setSpinning(false), 500);
     };
 
     const handleRadioChange = () => {
-        setIsContact({
-            newContact: "",
-            contactRegistered: true, // chọn radio thì xoá text
-        });
+        setValue("contactRegistered", true, { shouldValidate: true });
+        setValue("contactShopper", "", { shouldValidate: true });
     };
 
-    const handleLogoChange = (files: FileList | null) => {
+    const handleLogoChange = (files: FileList | null, onChange: (files: FileList | null) => void) => {
         if (!files || files.length === 0) return;
         const imgPreview = URL.createObjectURL(files[0]);
         setLogoPreview(imgPreview);
+        onChange(files);
+        trigger("logo");
     };
 
-    const handleBannerChange = (files: FileList | null) => {
+    const handleBannerChange = (files: FileList | null, onChange: (files: FileList | null) => void) => {
         if (!files || files.length === 0) return;
         const imgPreview = URL.createObjectURL(files[0]);
         setBannerPreview(imgPreview);
+        onChange(files);
+        trigger("banner");
     };
 
-    const submit = (data: IFormShopperRegister) => {
+    const submit = (data: ShopperRegisterForm) => {
         if (!data) return;
-        console.log(data);
+
+        const formData = new FormData();
+        const shopperDto: ShopperDTO = {
+            name: data.name,
+            address: data.address.street,
+            contactRegistered: data.contactRegistered,
+            contactShopper: data.contactShopper || "",
+            description: data.description,
+            latitude: data.location.latitude,
+            longitude: data.location.longitude
+        }
+
+        formData.append("data", JSON.stringify(shopperDto));
+        if (data.logo?.[0]) formData.append("logo", data.logo[0]);
+        if (data.banner?.[0]) formData.append("banner", data.banner[0]);
+
+        registerShopperMutation.mutate(formData, {
+            onSuccess: (data) => {
+                console.log("Success:", data);
+            },
+            onError: (error) => {
+                console.error("Error:", error);
+            },
+        })
     };
 
     return (
         <form
             onSubmit={handleSubmit(submit)}
-            className="max-w-3xl mx-auto bg-white p-6 rounded-2xl shadow-md"
-        >
-
+            className="max-w-3xl mx-auto bg-white p-6 rounded-2xl shadow-md">
             {/* name */}
             <label className="block mb-3">
-                <span className="text-sm font-medium">Name shop</span>
+                <span className="text-md font-semibold">Name shop</span>
                 <input
                     className="mt-1 block w-full rounded-lg border p-2"
                     {...register("name")}
                 />
+                {errors.name && (
+                    <p className="text-red-500 text-sm">{errors.name.message}</p>
+                )}
             </label>
 
             {/* logo */}
             <label className="block mb-3">
-                <span className="text-sm font-medium">Logo shop</span>
-                <input
-                    type="file"
-                    className="mt-1 block w-full rounded-lg border p-2 mb-2"
-                    {...register("logo")}
-                    onChange={(e) => handleLogoChange(e.target.files)}
-                />
+                <span className="text-md font-semibold">Logo shop</span>
+                <Controller
+                    control={control}
+                    name="logo"
+                    defaultValue={null}
+                    render={({ field }) => (
+                        <>
+                            <input
+                                type="file"
+                                accept="image/*"
+                                className="mt-1 block w-full rounded-lg border p-2 mb-2"
+                                {...register("logo")}
+                                onChange={(e) => handleLogoChange(e.target.files, field.onChange)}
+                            />
+                            {errors.logo && (
+                                <p className="text-red-500">{String(errors.logo.message)}</p>
+                            )}
+                        </>
+                    )}
+                ></Controller>
 
                 {logoPreview && (
                     <div className="flex gap-3 flex-wrap">
@@ -117,19 +171,29 @@ export default function () {
                         </div>
                     </div>
                 )}
-
-
             </label>
 
             {/* banner */}
             <label className="block mb-3">
-                <span className="text-sm font-medium">Banner</span>
-                <input
-                    type="file"
-                    className="mt-1 block w-full rounded-lg border p-2 mb-2"
-                    {...register("banner")}
-                    onChange={(e) => handleBannerChange(e.target.files)}
-                />
+                <span className="text-md font-semibold">Banner</span>
+                <Controller
+                    control={control}
+                    name="banner"
+                    defaultValue={null}
+                    render={({ field }) => (
+                        <>
+                            <input
+                                type="file"
+                                accept="image/*"
+                                className="mt-1 block w-full rounded-lg border p-2 mb-2"
+                                {...register("banner")}
+                                onChange={(e) => handleBannerChange(e.target.files, field.onChange)} />
+                            {errors.banner && (
+                                <p className="text-red-500 text-sm">{String(errors.banner.message)}</p>
+                            )}
+                        </>
+                    )}
+                ></Controller>
 
                 {bannerPreview && (<div className="flex gap-3 flex-wrap">
                     <div className="w-28 h-20 rounded overflow-hidden border flex items-center justify-center">
@@ -144,37 +208,42 @@ export default function () {
 
             {/* description */}
             <label className="mb-3 flex flex-col ">
-                <span className="text-sm font-medium">Description</span>
+                <span className="text-md font-semibold">Description</span>
                 <textarea className="border rounded-lg p-2" {...register("description")} ></textarea>
+                {errors.description && (
+                    <p className="text-red-500 text-sm">{errors.description.message}</p>
+                )}
             </label>
 
             {/* contact */}
             <label className="mb-3 flex flex-col ">
-                <span className="text-sm font-medium">Contact</span>
+                <span className="text-md font-semibold">Contact</span>
                 <input
                     type="text"
-                    className={`mt-1 block w-full rounded-lg border p-2 ${isContact?.contactRegistered ? `border-black/15 cursor-not-allowed` : ``}`}
+                    className={`mt-1 block w-full rounded-lg border p-2 ${contactRegistered ? `border-black/15 cursor-not-allowed` : ``}`}
                     {...register("contactShopper")}
-                    value={isContact?.newContact || ""}
+                    value={contactShopper || ""}
                     onChange={handleTextChange}
-                    disabled={isContact?.contactRegistered} // disable nếu đã chọn radio
+                    disabled={contactRegistered}
                 />
-                <span className="font-semibold italic">Or contact that you used to register profile</span>
+                <span className="italic">Or contact that you used to register profile</span>
                 <div className="flex items-center">
                     <div className="flex items-center">
                         <input
+                            className={`${contactShopper ? `opacity-80 cursor-not-allowed` : ``}`}
                             {...register("contactRegistered")}
                             type="radio"
-                            checked={isContact?.contactRegistered || false}
+                            checked={contactRegistered}
                             onChange={handleRadioChange}
-                            disabled={!!isContact?.newContact} // disable nếu đã nhập text
-                            className={` ${!!isContact?.newContact ? `opacity-80 cursor-not-allowed` : ``}`}
-                            name="contactRegistered"
+                            disabled={contactShopper != ""}
                         />
                     </div>
                     <span className="mx-2">{profile?.phone_number}</span>
                     <FontAwesomeIcon icon={faArrowsRotate} onClick={handleRefreshContact} className={`hover:cursor-pointer  ${spinning ? "animate-spin" : ""}`} />
                 </div>
+                {errors.contactShopper && (
+                    <p className="text-red-500">{errors.contactShopper.message}</p>
+                )}
             </label>
 
             <Controller
@@ -184,10 +253,37 @@ export default function () {
                     <AddressComponent value={field.value} onChange={field.onChange} />
                 )}
             />
+            {errors.address?.province && (
+                <p className="text-red-500 text-sm">{errors.address.province?.message}</p>
+            )}
+            {province && errors.address?.district && (
+                <p className="text-red-500 text-sm">{errors.address.district?.message}</p>
+            )}
+            {district && errors.address?.ward && (
+                <p className="text-red-500 text-sm">{errors.address.ward?.message}</p>
+            )}
+            {ward && errors.address?.street && (
+                <p className="text-red-500 text-sm">{errors.address.street?.message}</p>
+            )}
 
             {/* Buttons */}
-            <div className="flex gap-3 justify-between">
-                <ShareLocationButton />
+            <div className="flex gap-3 justify-between items-center relative mt-5">
+                <Controller
+                    name="location"
+                    control={control}
+                    render={({ field }) => (
+                        <ShareLocationButton value={field.value} onChange={field.onChange} />
+                    )}
+                />
+
+                {longitude > 0 && latitude > 0 ? <FontAwesomeIcon icon={faCheckDouble} size="2x" color="green" className="left-56 absolute" /> : <></>}
+                {errors.location?.latitude && (
+                    <p className="text-red-500 text-sm">{errors.location.latitude.message}</p>
+                )}
+                {errors.location?.longitude && (
+                    <p className="text-red-500 text-sm">{errors.location.longitude.message}</p>
+                )}
+
                 <button
                     type="submit"
                     className="px-4 py-2 rounded-lg bg-blue-600 text-white"

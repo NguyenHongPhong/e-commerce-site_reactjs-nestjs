@@ -1,4 +1,3 @@
-import { data } from 'react-router';
 import api from ".";
 import { IUserDto, IUserResetPassword } from "../types/dto/user.dto";
 const API_BASE = '/users';
