@@ -13,6 +13,7 @@ import { ColorModule } from './color/color.module';
 import { MaterialModule } from './material/material.module';
 import { SizeModule } from './size/size.module';
 import { ProductImgModule } from './product_img/product.img.module';
+import { ShopperModule } from './shopper/shopper.module';
 @Module({
     imports: [
         ConfigModule.forRoot({
@@ -28,7 +29,8 @@ import { ProductImgModule } from './product_img/product.img.module';
         ColorModule,
         MaterialModule,
         SizeModule,
-        ProductImgModule
+        ProductImgModule,
+        ShopperModule
     ],
     controllers: [AppController],
     providers: [PrismaService],

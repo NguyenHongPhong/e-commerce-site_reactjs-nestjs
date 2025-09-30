@@ -8,8 +8,8 @@ import { CreateUserDto } from '../user/dto/create-user.dto';
 import { USER_STATUS, ROLES } from '../common/constants/app.constant';
 import { AuthRepository } from './auth.repository';
 import * as bcrypt from 'bcrypt';
-
-
+import { createUserRole } from '../user/dto/create-user.dto';
+import { USER_ROLES } from '../common/constants/app.constant';
 @Injectable()
 export class AuthService {
     private clientId: string;
@@ -17,8 +17,8 @@ export class AuthService {
     private redirectUri: string;
     private redirectLoginUri: string;
     private oauth2Client: OAuth2Client;
-    private readonly ACCESS_TTL = 60 * 1;        // 5 phút (giây)
-    private readonly REFRESH_TTL = 60; // 7 ngày (giây)
+    private readonly ACCESS_TTL = 15 * 60; // 15mins
+    private readonly REFRESH_TTL = 24 * 60 * 60; // 1day
 
     constructor(private configService: ConfigService, private authRepository: AuthRepository,
         private readonly userRepository: UserRepository, private jwtService: JwtService,) {
@@ -73,6 +73,11 @@ export class AuthService {
             const userInfo = await this.verifyIdTokenOfGoogle(tokens.id_token);
             // Tạo JWT riêng cho app dựa trên info user (ví dụ email, sub)
             const addedUser = await this.addUserProvider(userInfo);
+            const userRole: createUserRole = {
+                user_id: addedUser.id,
+                role_id: USER_ROLES.user
+            };
+            await this.authRepository.insertUserRole(userRole);
             return addedUser;
 
         } catch (error) {
@@ -161,7 +166,7 @@ export class AuthService {
             sub: user.id,       // Subject - ID của user trong DB của bạn, định danh duy nhất người sở hữu token
             iss: "e-commerce",         // Issuer - ai phát hành token này (ở đây là hệ thống e-commerce của bạn)
             role: ROLES.customer,
-        }, { expiresIn: this.ACCESS_TTL + '15m' });
+        }, { expiresIn: this.ACCESS_TTL });
 
         // refreshToken (dài hạn, dùng để cấp lại accessToken)
         const refreshToken = await this.jwtService.signAsync({
@@ -169,7 +174,7 @@ export class AuthService {
             role: ROLES.customer,
         }, {
             secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
-            expiresIn: '1h',
+            expiresIn: this.REFRESH_TTL,
         });
 
         const server_now = Math.floor(Date.now() / 1000);
@@ -195,14 +200,14 @@ export class AuthService {
                 sub: user.id,       // Subject - ID của user trong DB của bạn, định danh duy nhất người sở hữu token
                 iss: "e-commerce",         // Issuer - ai phát hành token này (ở đây là hệ thống e-commerce của bạn)
                 role: ROLES.customer,
-            }, { expiresIn: '15m' });
+            }, { expiresIn: this.ACCESS_TTL });
 
             refreshToken = await this.jwtService.signAsync({
                 sub: user.id,
                 role: ROLES.customer,
             }, {
                 secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
-                expiresIn: '1h',
+                expiresIn: this.REFRESH_TTL,
             });
             const { password, providerId, updated_at, created_at, ...result } = user;
             const decoded: any = this.jwtService.decode(accessToken);

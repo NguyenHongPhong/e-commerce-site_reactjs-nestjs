@@ -1,12 +1,13 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { createCategory, getCategories } from '@api/category';
+import { createUser } from '@api/user';
 import { getProfile } from '@api/user';
 import { logout } from '@api/auth';
+import { IUserDto } from '@uiTypes/dto/user.dto';
 //hàm này sau này mới config lại nên chưa sử dụng
 export const useCreateUserMutation = () => {
     return useMutation({
-        mutationFn: async (newCategory: any) => {
-            const { data } = await createCategory(newCategory);
+        mutationFn: async (newUser: IUserDto) => {
+            const { data } = await createUser(newUser);
             return data;
         }
     });

@@ -43,7 +43,8 @@ export default function CategoryForm() {
                 name: data.name,
                 description: data.description,
                 parentId: data.parent_id,
-                images: files
+                images: files,
+                folder_name: "categories"
             };
 
             dispatch(enableLoading());

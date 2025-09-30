@@ -1,5 +1,5 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
-import { categoryDto } from './dto/category';
+import { CreateCategoryDto } from './dto';
 import { CategoryRepository } from './category.repository';
 import { CategoryImagesRepository } from '../category_images/category_images.repository';
 @Injectable()
@@ -30,12 +30,13 @@ export class CategoryService {
     }
 
 
-    async create(data: categoryDto, files: Express.Multer.File[]) {
+    async create(data: CreateCategoryDto, files: Express.Multer.File[]) {
         const newCategory = {
             name: data.name,
             slug: this.normalizeName(data.name),
             description: data.description,
-            parent_id: data.parentId ? Number(data.parentId) : 0
+            parent_id: data.parentId ? Number(data.parentId) : 0,
+            id_shop: data.id_shop
         }
 
         const category = await this.categoryRepository.create(newCategory);

@@ -14,7 +14,8 @@ export interface IFormData {
     name: string,
     description: string,
     parentId?: string,
-    images: File[]
+    images: File[],
+    folder_name: string
 }
 
 export type typeCategories = {
@@ -65,5 +66,7 @@ export function toFormData(dto: IFormData): FormData {
     dto.images.forEach((file) => {
         formData.append("images", file);
     });
+
+    formData.append("folder", dto.folder_name);
     return formData;
 }

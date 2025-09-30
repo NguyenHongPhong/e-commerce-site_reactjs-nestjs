@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { CreateUserDto } from './dto/create-user.dto';
+import { CreateUserDto, createUserRole } from './dto';
 @Injectable()
 export class UserRepository {
     constructor(private prisma: PrismaService) { }
@@ -20,8 +20,13 @@ export class UserRepository {
         });
     }
 
-    async createUser(data: CreateUserDto) {
-        return this.prisma.user.create({ data });
+    async createUser(newUser: CreateUserDto) {
+        return this.prisma.user.create({
+            data: {
+                ...newUser,
+                last_login_at: new Date()
+            }
+        });
     }
 
     findById(id: string) {
@@ -53,5 +58,20 @@ export class UserRepository {
             where: { id: row.id },
             data: { [fieldUpdate]: value },
         });
+    }
+
+    async insertUserRole(data: createUserRole) {
+        return this.prisma.user_Roles.create({ data });
+    }
+
+    async findPhoneNumberById(id: string) {
+        const user = await this.prisma.user.findFirst({
+            where: { id: id },
+        });
+
+        if (user) {
+            const { phone_number } = user;
+            return phone_number;
+        }
     }
 }

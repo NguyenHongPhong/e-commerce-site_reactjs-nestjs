@@ -14,25 +14,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id                String    @id @default(uuid())
-  status_id         Int
-  username          String
-  password          String
-  first_name        String
-  last_name         String
-  email             String    @unique
-  portrait          String?
-  phone_number      String?
-  isShop            Boolean   @default(false)
-  email_verified_at Boolean   @default(false)
-  last_login_at     DateTime?
-  providerId        String?
-  provider          String?
-  created_at        DateTime  @default(now())
-  updated_at        DateTime  @updatedAt
-}
-
+// ====== ENUMS ======
 enum UserStatusName {
   active
   inactive
@@ -41,14 +23,91 @@ enum UserStatusName {
   banned
 }
 
+enum ShopStatusName {
+  active
+  suspended
+  closed
+}
+
+// ====== MODELS ======
+model User {
+  id                String       @id @default(uuid())
+  status_id         Int
+  username          String
+  password          String
+  first_name        String
+  last_name         String
+  email             String       @unique
+  portrait          String?
+  phone_number      String?
+  email_verified_at Boolean      @default(false)
+  last_login_at     DateTime?
+  providerId        String?
+  provider          String?
+  created_at        DateTime     @default(now())
+  updated_at        DateTime     @updatedAt
+
+  // Relations
+  status            User_Status  @relation(fields: [status_id], references: [id])
+  roles             User_Roles[]
+  shop      Shops?
+}
+
 model User_Status {
-  id   Int            @id
-  name UserStatusName
+  id    Int            @id @default(autoincrement())
+  name  UserStatusName @unique
+
+  // Relations
+  users User[]
 }
 
 model Roles {
-  id   Int    @id
-  name String @unique
+  id          Int              @id @default(autoincrement())
+  name        String           @unique
+
+  // Relations
+  users       User_Roles[]
+  permissions Role_Permissions[]
+}
+
+model User_Roles {
+  user_id String
+  role_id Int
+
+  // Relations
+  user User   @relation(fields: [user_id], references: [id])
+  role Roles  @relation(fields: [role_id], references: [id])
+
+  @@id([user_id, role_id])
+}
+
+model Permissions {
+  id         Int       @id @default(autoincrement())
+  action_id  Int       @unique
+
+  // Relations
+  action     Actions          @relation(fields: [action_id], references: [id])
+  roles      Role_Permissions[]
+}
+
+model Role_Permissions {
+  role_id       Int
+  permission_id Int
+
+  // Relations
+  role       Roles       @relation(fields: [role_id], references: [id])
+  permission Permissions @relation(fields: [permission_id], references: [id])
+
+  @@id([role_id, permission_id])
+}
+
+model Actions {
+  id           Int           @id @default(autoincrement())
+  action_name  String         @unique
+  description  String?
+
+  // Relations
+  permissions  Permissions[]
 }
 
 model Otp {
@@ -59,16 +118,51 @@ model Otp {
   createdAt DateTime @default(now())
 }
 
+model Shops {
+  id           String      @id @default(uuid())
+  user_id      String      @unique
+  name         String
+  slug         String      @unique
+  logo_url     String?
+  banner_url   String?
+  description  String?     @db.Text
+  phone_number String?
+  address      String?
+  location_lat Float?
+  location_lng Float?
+  is_verified  Boolean     @default(false)
+  created_at   DateTime    @default(now())
+  updated_at   DateTime    @updatedAt
+
+  // Relations
+  owner        User        @relation(fields: [user_id], references: [id])
+  status       Shop_Status[]
+  categories   Category[]
+}
+
+model Shop_Status {
+  id       Int    @id @default(autoincrement())
+  shop_id  String
+  name     ShopStatusName @default(active)
+
+  // Relations
+  shop     Shops  @relation(fields: [shop_id], references: [id])
+}
+
+
 model Category {
   id          Int               @id @default(autoincrement())
+  id_shop     String
   name        String
   slug        String
   description String?           @db.Text
   parent_id   Int?
   is_active   Boolean           @default(true)
   updatedAt   DateTime          @updatedAt
-  createAt    DateTime          @default(now())
+  createdAt   DateTime          @default(now())
 
+  // Relations
+  shop        Shops             @relation(fields: [id_shop], references: [id])
   images      Category_images[] @relation("CategoryImages")
 }
 

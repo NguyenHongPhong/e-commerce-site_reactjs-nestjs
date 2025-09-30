@@ -96,3 +96,21 @@ export type FormCreateProductValues = {
     sizes: string[];
     imgs: File[];
 };
+
+export interface IContact {
+    newContact: string,
+    contactRegistered: boolean
+}
+
+export type IAddress = {
+    province: string;
+    district: string;
+    ward: string;
+    street: string;
+};
+
+export type ILocation = {
+    latitude: number,
+    longitude: number
+};
+

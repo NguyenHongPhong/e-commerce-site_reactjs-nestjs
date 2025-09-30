@@ -18,7 +18,7 @@ export class CategoryRepository {
                 images: true,
             },
             orderBy: {
-                createAt: "desc", // mới nhất trước
+                createdAt: "desc", // mới nhất trước
             },
         });
         return categories;
