@@ -11,3 +11,4 @@ export const getProducts = async () => {
     const res = await api.get(API_BASE + '/getAll');
     return res.data;
 }
+

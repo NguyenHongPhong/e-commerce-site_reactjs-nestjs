@@ -9,7 +9,6 @@ import RecoveryPassword from "../pages/recovery/RecoveryPassword";
 import RecoverLayout from "../layouts/RecoverLayout";
 import VerifyOTP from "../pages/recovery/VerifyOTP";
 import ResetPassword from "../pages/recovery/ResetPassword";
-import CreatePage from "@pages/category/CreatePage";
 import ProductPage from "@pages/product/index";
 import { AuthenticationUser } from "@components/protectedRoute/AuthenticationUser";
 import { useDispatch } from "react-redux";
@@ -64,14 +63,9 @@ function AppRoutes() {
                     </AuthenticationUser>
                 }
             >
+
                 <Route path="register" element={<RegisterShpperPage />} />
 
-                {/* Category routes */}
-                <Route path="category">
-                    {/* <Route index element={<CategoryList />} /> */}
-                    <Route path="create" element={<CreatePage />} />
-                    {/* <Route path="edit/:id" element={<CategoryEdit />} /> */}
-                </Route>
 
                 {/* Product routes */}
                 <Route path="product">

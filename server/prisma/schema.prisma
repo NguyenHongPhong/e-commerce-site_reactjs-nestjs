@@ -181,13 +181,13 @@ model Product {
   id           String            @id @default(uuid())
   title        String
   slug         String            @unique
-  description  String?           @db.Text
+  description  String           @db.Text
   price        Float
   rate_star    Float?            @default(0)
   rate_count   Int?              @default(0)
   sold         Int?              @default(0)
   category_id  Int
-  shop_id      Int?
+  shop_id      Int
   created_at   DateTime          @default(now())
   updated_at   DateTime          @updatedAt
 
@@ -234,12 +234,12 @@ model Product_Images {
 
 model Rate {
   id          Int     @id @default(autoincrement())
-  user_id     String?
-  product_id  String?
+  user_id     String
+  product_id  String
 
-  star_rating Int?
+  star_rating Int
 
-  product   Product? @relation(fields: [product_id], references: [id], onDelete: Cascade)
+  product   Product @relation(fields: [product_id], references: [id], onDelete: Cascade)
 }
 
 

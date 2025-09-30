@@ -1,4 +1,4 @@
-import { Controller, Post, Body, UploadedFiles, UseInterceptors, UseGuards, Req } from '@nestjs/common';
+import { Controller, Post, Body, UploadedFiles, UseInterceptors, UseGuards, Req, Get, Param } from '@nestjs/common';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { JwtAuthGuard } from '@/auth/guards/jwt-auth.guard';
 import { ShopperService } from './shopper.service';
@@ -33,5 +33,12 @@ export class ShopperController {
         const bannerFile = files.banner?.[0];
 
         return this.shopperService.create(shopperDto, logoFile, bannerFile, userId);
+    }
+
+    @Get(':shopId/categories')
+    async getCategoriesByShop(@Param('shopId') shopId: string) {
+        console.log(shopId);
+
+        // return this.categoryService.getCategoriesByShop(shopId);
     }
 }
