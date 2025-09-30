@@ -1,2 +1,2 @@
-export { ShopperDTO } from "./shoppers.dto";
+export { ShopperDTO, registerShopperDto } from "./shoppers.dto";
 

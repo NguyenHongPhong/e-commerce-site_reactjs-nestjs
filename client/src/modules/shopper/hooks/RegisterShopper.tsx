@@ -17,7 +17,7 @@ import { ShopperDTO } from "@uiTypes/dto/shopper.dto";
 import { useRegisterShopperMutation } from "../queries";
 export default function () {
     const profile = useAppSelector(state => state.auth.user);
-    const { control, register, handleSubmit, setValue, formState: { errors }, watch, trigger } = useForm<ShopperRegisterForm>({
+    const { control, register, handleSubmit, setValue, formState: { errors }, watch, trigger, reset } = useForm<ShopperRegisterForm>({
         resolver: zodResolver(shopperRegisterSchema),
         defaultValues: {
             name: "",
@@ -107,13 +107,16 @@ export default function () {
             longitude: data.location.longitude
         }
 
+        formData.append("folder", "shopper");
         formData.append("data", JSON.stringify(shopperDto));
         if (data.logo?.[0]) formData.append("logo", data.logo[0]);
         if (data.banner?.[0]) formData.append("banner", data.banner[0]);
 
         registerShopperMutation.mutate(formData, {
             onSuccess: (data) => {
-                console.log("Success:", data);
+                notify(data.message, "success");
+                reset();
+                setTimeout(() => { }, 2000);
             },
             onError: (error) => {
                 console.error("Error:", error);

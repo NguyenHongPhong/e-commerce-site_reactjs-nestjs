@@ -63,4 +63,15 @@ export class UserRepository {
     async insertUserRole(data: createUserRole) {
         return this.prisma.user_Roles.create({ data });
     }
+
+    async findPhoneNumberById(id: string) {
+        const user = await this.prisma.user.findFirst({
+            where: { id: id },
+        });
+
+        if (user) {
+            const { phone_number } = user;
+            return phone_number;
+        }
+    }
 }

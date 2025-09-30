@@ -1,28 +1,15 @@
-// import { PrismaService } from '@/prisma/prisma.service';
-// import { Injectable } from '@nestjs/common';
-// import { CreateProductDtoInRepo } from './dto/products.dto';
-// @Injectable()
-// export class ProductRepository {
-//     constructor(private readonly prisma: PrismaService) {
-//     };
+import { PrismaService } from '@/prisma/prisma.service';
+import { Injectable } from '@nestjs/common';
+import { registerShopperDto } from './dto';
+@Injectable()
+export class ShopperRepository {
+    constructor(private readonly prisma: PrismaService) {
+    };
 
-//     async create(data: CreateProductDtoInRepo) {
-//         return await this.prisma.product.create(
-//             { data }
-//         );
-//     }
+    async create(data: registerShopperDto) {
+        return await this.prisma.shops.create(
+            { data }
+        );
+    }
 
-//     async getAll() {
-//         return this.prisma.product.findMany({
-//             include: {
-//                 product_Images: true,
-//                 colors: true,
-//                 materials: true,
-//                 sizes: true,
-//             },
-//             orderBy: {
-//                 created_at: 'desc',
-//             },
-//         });
-//     };
-// }
+}

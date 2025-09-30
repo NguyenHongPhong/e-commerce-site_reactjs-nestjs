@@ -59,6 +59,7 @@ export default function ProductForm() {
         data.colors.forEach((color) => formData.append("colors", color));
         data.materials.forEach((material) => formData.append("materials", material));
         data.sizes.forEach((size) => formData.append("sizes", size));
+        formData.append("folder", "products");
 
         dispatch(enableLoading());
 
