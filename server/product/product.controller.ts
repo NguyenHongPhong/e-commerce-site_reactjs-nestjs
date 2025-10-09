@@ -1,6 +1,5 @@
 import { Controller, Post, Body, UploadedFiles, UseInterceptors, Get, UseGuards } from '@nestjs/common';
-import { FilesInterceptor } from '@nestjs/platform-express';
-import { CreateProductDto } from './dto';
+import { AnyFilesInterceptor } from '@nestjs/platform-express';
 import { MulterUploadOptions } from '@/config/cloudinary.config';
 import { ProductService } from './product.service';
 import { JwtAuthGuard } from '@/auth/guards/jwt-auth.guard';
@@ -12,13 +11,21 @@ export class ProductController {
     //Authenticate router
     @UseGuards(JwtAuthGuard)
     @Post('create')
-    @UseInterceptors(FilesInterceptor('imgs', 10, MulterUploadOptions)) // tên field 'imgs' trùng với formData
+    @UseInterceptors(
+        AnyFilesInterceptor(MulterUploadOptions)
+    )
     create(
         @UploadedFiles() files: Express.Multer.File[],
-        @Body() body: CreateProductDto
+        @Body('product') productJson: string,
+        @Body('category') categoryJson: string,
     ) {
-        return this.productService.create(body, files ?? []);
+        const productFiles = files.filter(f => f.fieldname === 'productImgs');
+        const categoryFiles = files.filter(f => f.fieldname === 'categoryImgs');
+
+        const productData = JSON.parse(productJson);
+        const categoryData = JSON.parse(categoryJson);
     }
+
 
     @Get('getAll')
     getProducts() {

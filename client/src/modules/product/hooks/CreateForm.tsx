@@ -1,375 +1,453 @@
-// import React, { useState, useEffect } from "react";
-// import { useForm, Controller } from "react-hook-form";
-// import Tags from "@components/tag/Tag";
-// import { useCreateProductMutation, } from "../queries";
-// import { useAppDispatch } from "hooks";
-// import { disableLoading, enableLoading } from "@reducers/loading";
-// import { notify } from "@utils/toast";
-// import { useQueryClient } from "@tanstack/react-query";
-// import { useNavigate } from "react-router-dom";
-// import { queryProductsByShop } from "@modules/shopper/queries";
-// import { useAppSelector } from "hooks";
-// import { productSchema } from "schema/createProductByShopper";
-// import { zodResolver } from "@hookform/resolvers/zod";
-// import { z } from "zod";
-// export default function ProductForm() {
-//     const idShop = useAppSelector(state => state.auth.user?.id);
-//     const { data: categories } = queryProductsByShop(idShop || "");
-//     const hasCategories = categories && categories.length > 0;
-//     const schema = productSchema(hasCategories);
-//     type CreateProductForm = Omit<z.infer<typeof schema>, "price"> & { price: number };
+import React, { useState, useEffect } from "react";
+import { useForm, Controller } from "react-hook-form";
+import Tags from "@components/tag/Tag";
+import { useCreateProductMutation, } from "../queries";
+import { useAppDispatch } from "hooks";
+import { disableLoading, enableLoading } from "@reducers/loading";
+import { notify } from "@utils/toast";
+import { useGetAllProductMutation } from "../queries";
+import { useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
+import { ProductFormValues, productSchema } from "schema/productSchema.schema";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { ICategoryDto, IProductDto } from "@uiTypes/dto/product.dto";
+export default function ProductForm() {
 
-//     const {
-//         register,
-//         control,
-//         handleSubmit,
-//         formState: { errors },
-//         setValue,
-//         watch,
-//     } = useForm<CreateProductForm>({
-//         resolver: zodResolver(schema),
-//         defaultValues: {
-//             categoriesExisted: "", // nếu category đã có
-//             categoryNew: "",       // nếu tạo category mới
-//             title: "",
-//             descriptionProduct: "",
-//             price: 0,
-//             colors: [],
-//             materials: [],
-//             sizes: [],
-//             imgs: [],
-//         },
-//     });
-//     const navigate = useNavigate();
-//     const queryClient = useQueryClient();
+    const navigate = useNavigate();
+    const queryClient = useQueryClient();
+    const { data: categories } = useGetAllProductMutation();
 
-//     const dispatch = useAppDispatch();
-//     const createProductMutation = useCreateProductMutation();
-//     const [previews, setPreviews] = useState<string[]>([]);
-//     const [preview, setPreview] = useState<string[]>([]);
-//     const [files, setFiles] = useState<File[]>([]);
-
-//     const imgs = watch("imgs");
-
-//     const handleImagesChange = (files: FileList | null) => {
-//         if (!files) return;
-//         const arr = Array.from(files);
-//         setValue("imgs", arr, { shouldValidate: true });
-
-//         const urls = arr.map((f) => URL.createObjectURL(f));
-//         setPreviews(urls);
-//     };
-
-//     const submit = (data: CreateProductForm) => {
-//         const formData = new FormData();
-//         formData.append("title", data.title);
-//         formData.append("description", data.description);
-//         formData.append("price", String(data.price));
-//         formData.append("category", String(data.category));
-//         data.imgs.forEach((file) => formData.append("imgs", file));
-//         data.colors.forEach((color) => formData.append("colors", color));
-//         data.materials.forEach((material) => formData.append("materials", material));
-//         data.sizes.forEach((size) => formData.append("sizes", size));
-//         formData.append("folder", "products");
-
-//         dispatch(enableLoading());
-
-//         createProductMutation.mutate(formData, {
-//             onSuccess: (data: any) => {
-//                 dispatch(disableLoading());
-//                 notify(data.message, "success");
-//                 queryClient.invalidateQueries({ queryKey: ["products"] });
-//                 navigate("/");
-//             },
-//             onError: (error: any) => {
-//                 dispatch(disableLoading());
-//                 console.error("❌ Error:", error);
-//             },
-//         });
-//     };
+    const dispatch = useAppDispatch();
+    const createProductMutation = useCreateProductMutation();
+    const [previews, setPreviews] = useState<string[]>([]);
+    const [preview, setPreview] = useState<string[]>([]);
+    const [files, setFiles] = useState<File[]>([]);
+    const [isOpenForm, setIsOpneForm] = useState(false);
 
 
-//     const handlePreview = (e: React.ChangeEvent<HTMLInputElement>) => {
-//         if (e.target.files) {
 
-//             const urls = Array.from(e.target.files).map((file) => URL.createObjectURL(file));
-//             const selectedFiles = Array.from(e.target.files);
-//             setFiles(selectedFiles);
-//             setPreview(urls);
-//         }
-//     };
+    // Preview cho ảnh sản phẩm
+    const handleImagesChange = (files: FileList | null) => {
+        if (!files) return;
+        const urls = Array.from(files).map((file) => URL.createObjectURL(file));
+        setPreviews(urls);
+        setValue("imgs", files as any);
+    };
 
-//     return (
-//         <form
-//             onSubmit={handleSubmit(submit)}
-//             className="max-w-3xl mx-auto bg-white p-6 rounded-2xl shadow-md"
-//         >
+    const {
+        register,
+        control,
+        handleSubmit,
+        formState: { errors },
+        setValue,
+    } = useForm<ProductFormValues>(
+        {
+            resolver: zodResolver(productSchema),
+            defaultValues: {
+                _categoriesExist: false,
+                selectCategory: "",
+                categoryName: "",
+                categoryDescription: "",
+                imgCategories: [],
+                imgs: [],
+                colors: [],
+                materials: [],
+                sizes: [],
+            },
+            mode: "onSubmit",
+        });
 
-//             {/* Categories*/}
-//             <label className="flex-col flex mb-3">
-//                 <span className="text-sm font-medium mb-3">Category</span>
-//                 {categories && categories.length > 0 ? (
-//                     <select
-//                         {...register("categoriesExisted")}
-//                         className="mt-2 block w-full rounded-lg border p-2 h-11"
-//                     >
-//                         <option value="">Select Category</option>
-//                         {categories.map((cat: any) => (
-//                             <option key={cat.id} value={cat.id}>
-//                                 {cat.name}
-//                             </option>
-//                         ))}
-//                     </select>
-//                 ) : (<div className="flex flex-col gap-3 p-4 w-full border rounded-lg">
-//                     {/* Name required */}
-//                     <input
-//                         type="text"
-//                         placeholder="Category name"
-//                         {...register("categoryNew", { required: "Category name is required" })}
-//                         className="border p-2 rounded"
-//                     />
-//                     {errors.name && <p className="text-red-500 text-sm">{errors.name.message}</p>}
+    useEffect(() => {
+        setValue("_categoriesExist", !!(categories && categories.length > 0));
+    }, [categories, setValue]);
 
-//                     {/* Description required */}
-//                     <input
-//                         type="text"
-//                         placeholder="Description"
-//                         {...register("description", { required: "Description is required" })}
-//                         className="border p-2 rounded"
-//                     />
-//                     {errors.description && (
-//                         <p className="text-red-500 text-sm">{errors.description.message}</p>
-//                     )}
 
-//                     {/* Parent category optional */}
-//                     {categories && categories.length > 0 && (
-//                         <select {...register("parent_id")} className="border p-2 rounded">
-//                             <option value="">Select Parent Category</option>
-//                             {categories.map((cat: any) => (
-//                                 <option key={cat.id} value={cat.id}>
-//                                     {cat.name}
-//                                 </option>
-//                             ))}
-//                         </select>
-//                     )}
+    const submit = (data: ProductFormValues) => {
+        const formData = new FormData();
+        const categoryData: ICategoryDto = {
+            name: data.categoryName,
+            description: data.categoryDescription
+        }
+        const productData: IProductDto = {
+            title: data.title,
+            colors: data.colors,
+            description: data.description,
+            materials: data.materials,
+            price: data.price,
+            sizes: data.sizes
+        };
 
-//                     {/* Multiple images required */}
-//                     <input
-//                         type="file"
-//                         multiple
-//                         accept="image/*"
-//                         {...register("images")}
-//                         onChange={handlePreview}
-//                         className="border p-2 rounded"
-//                     />
-//                     {errors.images && (
-//                         <p className="text-red-500 text-sm">{errors.images.message}</p>
-//                     )}
+        formData.append("category", JSON.stringify(categoryData));
+        formData.append("product", JSON.stringify(productData));
+        formData.append("folder", "Product Images");
+        Array.from(data.imgCategories ?? []).forEach((file) => {
+            formData.append("categoryImgs", file as File); // ⚡ type assertion
+        });
 
-//                     {/* Preview images */}
-//                     <div className="flex gap-2 flex-wrap">
-//                         {preview.map((src, i) => (
-//                             <img
-//                                 key={i}
-//                                 src={src}
-//                                 alt="preview"
-//                                 className="w-16 h-16 object-cover rounded"
-//                             />
-//                         ))}
-//                     </div>
-//                 </div>)}
-//                 {errors.category && (
-//                     <p className="text-red-500 text-sm mt-1">
-//                         {String(errors.category.message)}
-//                     </p>
-//                 )}
-//             </label>
+        Array.from(data.imgs ?? []).forEach((file) => {
+            formData.append("productImgs", file as File); // ⚡ type assertion
+        });
 
-//             {/* Title */}
-//             <label className="block mb-3">
-//                 <span className="text-sm font-medium">Title</span>
-//                 <input
-//                     {...register("title", { required: "Title is required" })}
-//                     className="mt-1 block w-full rounded-lg border p-2"
-//                 />
-//                 {errors.title && (
-//                     <p className="text-red-500 text-sm mt-1">{errors.title.message}</p>
-//                 )}
-//             </label>
 
-//             {/* Description */}
-//             <label className="block mb-3">
-//                 <span className="text-sm font-medium">Description</span>
-//                 <textarea
-//                     {...register("description")}
-//                     className="mt-1 block w-full rounded-lg border p-2"
-//                     rows={4}
-//                 />
-//                 {errors.description && (
-//                     <p className="text-red-500 text-sm mt-1">
-//                         {String(errors.description.message)}
-//                     </p>
-//                 )}
-//             </label>
+        console.log("✅ Valid form data:", data);
 
-//             {/* Price */}
-//             <label className="block mb-3">
-//                 <span className="text-sm font-medium">Price</span>
-//                 <input
-//                     type="number"
-//                     step="0.01"
-//                     inputMode="numeric"
-//                     pattern="[0-9]*"
-//                     {...register("price")}
-//                     className="mt-1 block w-full rounded-lg border p-2"
-//                 />
-//                 {errors.price && (
-//                     <p className="text-red-500 text-sm mt-1">
-//                         {String(errors.price.message)}
-//                     </p>
-//                 )}
-//             </label>
 
-//             <div className="flex">
-//                 <span className="italic font-semibold underline mr-3">Note:</span>
-//                 <p className="">In below section, after you've wrote one value, click "Enter" to save it</p>
-//             </div>
+        //         dispatch(enableLoading());
 
-//             <div className="border-2 border-cyan-700 rounded-2xl p-3 mt-3">
-//                 {/* Colors */}
-//                 <div className="mb-6">
-//                     <label className="block mb-2">
-//                         <span className="text-sm font-medium">Colors</span>
+        createProductMutation.mutate(formData, {
+            onSuccess: (data: any) => {
+                dispatch(disableLoading());
+                notify(data.message, "success");
+                queryClient.invalidateQueries({ queryKey: ["products"] });
+                // navigate("/");
+            },
+            onError: (error: any) => {
+                dispatch(disableLoading());
+                console.error("❌ Error:", error);
+            },
+        });
+    };
 
-//                         <Controller
-//                             name="colors"
-//                             control={control}
-//                             rules={{
-//                                 required: "Please add at least one color",
-//                                 validate: (v) =>
-//                                     (v && v.length > 0) || "This field cannot be empty",
-//                             }}
-//                             render={({ field }) => (
-//                                 <Tags
-//                                     values={field.value}
-//                                     onChange={field.onChange}
-//                                     field="colors"
-//                                 />
-//                             )}
-//                         />
+    const handlePreview = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files) {
+            const urls = Array.from(e.target.files).map((file) => URL.createObjectURL(file));
+            const selectedFiles = Array.from(e.target.files);
+            setFiles(selectedFiles);
+            setPreview(urls);
+        }
+    };
 
-//                         {errors.colors && (
-//                             <p className="text-red-500 text-sm mt-1">
-//                                 {errors.colors.message}
-//                             </p>
-//                         )}
-//                     </label>
-//                 </div>
 
-//                 {/* Materials */}
-//                 <div className="mb-6">
-//                     <label className="block mb-2">
-//                         <span className="text-sm font-medium">Materials</span>
+    return (
+        <form
+            onSubmit={handleSubmit(submit)}
+            className="max-w-3xl mx-auto bg-white p-6 rounded-2xl shadow-md mt-10"
+        >
+            {/** Categories */}
+            <input type="hidden" {...register("_categoriesExist")} />
 
-//                         <Controller
-//                             name="materials"
-//                             control={control}
-//                             rules={{
-//                                 required: "Please add at least one material",
-//                                 validate: (v) => (v && v.length > 0) || "This field cannot be empty",
-//                             }}
-//                             render={({ field }) => (
-//                                 <Tags
-//                                     values={field.value}
-//                                     onChange={field.onChange}
-//                                     field="materials"
-//                                 />
-//                             )}
-//                         />
+            {categories && categories.length > 0 && (
+                <div className="flex flex-row justify-end gap-3">
+                    <div className="flex gap-2">
+                        <input type="radio" checked={!isOpenForm} onChange={(e) => setIsOpneForm(!e.target.checked)} className="hover:cursor-pointer" />
+                        <span className="font-bold">Select available categories</span>
+                    </div>
+                    <div className="flex gap-2">
+                        <input type="radio" checked={isOpenForm} onChange={(e) => setIsOpneForm(e.target.checked)} className="hover:cursor-pointer" />
+                        <span className="font-bold">Create new category</span>
+                    </div>
+                </div>
+            )}
 
-//                         {errors.materials && (
-//                             <p className="text-red-500 text-sm mt-1">
-//                                 {errors.materials.message as string}
-//                             </p>
-//                         )}
-//                     </label>
-//                 </div>
+            <label className="flex-col flex">
+                <h3 className="text-xl font-medium">Categories</h3>
+                {categories && categories.length > 0 && (
+                    <div>
+                        <select
+                            {...register("selectCategory")}
+                            className="mt-2 block w-full rounded-lg border p-2 h-11 disabled:cursor-not-allowed  
+                            disabled:bg-gray-100 disabled:text-gray-400"
+                            disabled={isOpenForm}
+                        >
+                            <option value="">Select category</option>
+                            {categories.map((cat: any) => (
+                                <option key={cat.id} value={cat.id}>
+                                    {cat.name}
+                                </option>
+                            ))}
+                        </select>
+                        {errors.selectCategory && (
+                            <p className="text-red-500 text-sm">{errors.selectCategory.message}</p>
+                        )}
+                    </div>
+                )}
 
-//                 {/* Sizes */}
-//                 <div className="mb-6">
-//                     <label className="block mb-2">
-//                         <span className="text-sm font-medium">Sizes</span>
+                {(categories === undefined || categories.length === 0 || isOpenForm) && ((<div className="flex flex-col gap-3 p-4 w-full border rounded-lg my-3 ">
+                    {/* Name required */}
+                    <label className="text-sm font-medium">Name</label>
+                    <input
+                        {...register("categoryName")}
+                        type="text"
+                        placeholder="Category name"
+                        className="border p-2 rounded"
+                    />
 
-//                         <Controller
-//                             name="sizes"
-//                             control={control}
-//                             rules={{
-//                                 required: "Please add at least one size",
-//                                 validate: (v) => (v && v.length > 0) || "This field cannot be empty",
-//                             }}
-//                             render={({ field }) => (
-//                                 <Tags values={field.value} onChange={field.onChange} field="sizes" />
-//                             )}
-//                         />
+                    {errors.categoryName && (
+                        <p className="text-red-500 text-sm">{errors.categoryName.message}</p>
+                    )}
 
-//                         {errors.sizes && (
-//                             <p className="text-red-500 text-sm mt-1">
-//                                 {errors.sizes.message as string}
-//                             </p>
-//                         )}
-//                     </label>
-//                 </div>
+                    <label className="text-sm font-medium">Description</label>
+                    {/* Description required */}
+                    <input
+                        {...register("categoryDescription")}
+                        type="text"
+                        placeholder="Description"
+                        className="border p-2 rounded"
+                    />
+                    {errors.categoryDescription && (
+                        <p className="text-red-500 text-sm">{errors.categoryDescription.message}</p>
+                    )}
 
-//             </div>
+                    {/* Parent category optional */}
+                    {categories && categories.length > 0 && (
+                        <div>
+                            <label className="text-sm font-medium">Belong to</label>
+                            <select className="border p-2 rounded">
+                                <option value="">Select Parent Category</option>
+                                {categories.map((cat: any) => (
+                                    <option key={cat.id} value={cat.id}>
+                                        {cat.name}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                    )}
 
-//             {/* Images */}
-//             <div className="mb-6">
-//                 <label className="block mb-2">
-//                     <span className="text-sm font-medium">Images</span>
-//                     <input
-//                         type="file"
-//                         multiple
-//                         accept="image/*"
-//                         onChange={(e) => handleImagesChange(e.target.files)}
-//                         className="mt-1 block w-full"
-//                     />
-//                     {/* hidden input to validate imgs */}
-//                     <input
-//                         type="hidden"
-//                         {...register("imgs")}
-//                     />
-//                     {errors.imgs && (
-//                         <p className="text-red-500 text-sm mt-1">
-//                             {errors.imgs.message as string}
-//                         </p>
-//                     )}
-//                 </label>
+                    {/* Multiple images required */}
+                    <Controller
+                        name="imgCategories"
+                        control={control}
+                        rules={{
+                            validate: (files) =>
+                                files && files.length > 0 || "At least one image is required",
+                        }}
+                        render={({ field }) => (
+                            <div className="flex flex-col gap-2">
+                                <label className="text-sm font-medium">Images</label>
+                                <input
+                                    type="file"
+                                    multiple
+                                    accept="image/*"
+                                    className="border p-2 rounded"
+                                    onChange={(e) => {
+                                        const files = e.target.files ?? new DataTransfer().files;
+                                        field.onChange(files); // ✅ set value cho RHF
+                                        setValue("imgCategories", files, { shouldValidate: true });
+                                        handlePreview(e); // preview hình
+                                    }}
+                                />
+                            </div>
+                        )}
+                    />
 
-//                 <div className="flex gap-3 flex-wrap">
-//                     {previews.map((src, i) => (
-//                         <div
-//                             key={i}
-//                             className="w-24 h-24 rounded overflow-hidden border"
-//                         >
-//                             <img
-//                                 src={src}
-//                                 alt={`preview-${i}`}
-//                                 className="w-full h-full object-cover"
-//                             />
-//                         </div>
-//                     ))}
-//                 </div>
-//             </div>
 
-//             {/* Buttons */}
-//             <div className="flex gap-3">
-//                 <button
-//                     type="submit"
-//                     className="px-4 py-2 rounded-lg bg-blue-600 text-white"
-//                 >
-//                     Save
-//                 </button>
-//             </div>
-//         </form>
-//     );
-// }
+                    {/* Preview images */}
+                    <div className="flex gap-2 flex-wrap">
+                        {preview.map((src, i) => (
+                            <img
+                                key={i}
+                                src={src}
+                                alt="preview"
+                                className="w-16 h-16 object-cover rounded"
+                            />
+                        ))}
+                    </div>
+
+                    {errors.imgCategories?.message && (
+                        <p className="text-red-500 text-sm">{String(errors.imgCategories.message)}</p>
+                    )}
+                </div>))}
+            </label>
+
+
+            <div className="my-5">
+                <h3 className=" font-medium mb-3 text-xl">Product</h3>
+                <div className="border border-b-black rounded-xl p-4">
+                    {/* Title */}
+                    <label className="block mb-3">
+                        <span className="text-sm font-medium">Title</span>
+                        <input
+                            {...register("title", { required: "Title is required" })}
+                            className="mt-1 block w-full rounded-lg border p-2"
+                        />
+                        {errors.title && (
+                            <p className="text-red-500 text-sm mt-1">{errors.title.message}</p>
+                        )}
+                    </label>
+
+                    {/* Description */}
+                    <label className="block mb-3">
+                        <span className="text-sm font-medium">Description</span>
+                        <textarea
+                            {...register("description", { required: "Description is required" })}
+                            className="mt-1 block w-full rounded-lg border p-2"
+                            rows={4}
+                        />
+                        {errors.description && (
+                            <p className="text-red-500 text-sm mt-1">
+                                {String(errors.description.message)}
+                            </p>
+                        )}
+                    </label>
+
+                    {/* Price + Category */}
+                    <div className="grid grid-cols-2 gap-4 mb-4">
+                        <label className="block">
+                            <span className="text-sm font-medium">Price</span>
+
+                            <input
+                                className="mt-1 block w-full rounded-lg border p-2"
+                                type="text"
+                                {...register("price")}
+                            />
+                            {errors.price && (
+                                <p className="text-red-500 text-sm mt-1">
+                                    {String(errors.price.message)}
+                                </p>
+                            )}
+                        </label>
+                    </div>
+
+                    <div className="flex">
+                        <span className="italic font-semibold underline mr-3">Note:</span>
+                        <p className="">In below section, after you've wrote one value, click "Enter" to save it</p>
+                    </div>
+
+                    <div className="border-2 border-cyan-700 rounded-2xl p-3 mt-3">
+                        {/* Colors */}
+                        <div className="mb-6">
+                            <label className="block mb-2">
+                                <span className="text-sm font-medium">Colors</span>
+
+                                <Controller
+                                    name="colors"
+                                    control={control}
+                                    rules={{
+                                        required: "Please add at least one color",
+                                        validate: (v) =>
+                                            (v && v.length > 0) || "This field cannot be empty",
+                                    }}
+                                    render={({ field }) => (
+                                        <Tags
+                                            values={field.value}
+                                            onChange={field.onChange}
+                                            field="colors"
+                                        />
+                                    )}
+                                />
+
+                                {errors.colors && (
+                                    <p className="text-red-500 text-sm mt-1">
+                                        {errors.colors.message}
+                                    </p>
+                                )}
+                            </label>
+                        </div>
+
+                        {/* Materials */}
+                        <div className="mb-6">
+                            <label className="block mb-2">
+                                <span className="text-sm font-medium">Materials</span>
+
+                                <Controller
+                                    name="materials"
+                                    control={control}
+                                    rules={{
+                                        required: "Please add at least one material",
+                                        validate: (v) => (v && v.length > 0) || "This field cannot be empty",
+                                    }}
+                                    render={({ field }) => (
+                                        <Tags
+                                            values={field.value}
+                                            onChange={field.onChange}
+                                            field="materials"
+                                        />
+                                    )}
+                                />
+
+                                {errors.materials && (
+                                    <p className="text-red-500 text-sm mt-1">
+                                        {errors.materials.message as string}
+                                    </p>
+                                )}
+                            </label>
+                        </div>
+
+                        {/* Sizes */}
+                        <div className="mb-6">
+                            <label className="block mb-2">
+                                <span className="text-sm font-medium">Sizes</span>
+
+                                <Controller
+                                    name="sizes"
+                                    control={control}
+                                    rules={{
+                                        required: "Please add at least one size",
+                                        validate: (v) => (v && v.length > 0) || "This field cannot be empty",
+                                    }}
+                                    render={({ field }) => (
+                                        <Tags values={field.value} onChange={field.onChange} field="sizes" />
+                                    )}
+                                />
+
+                                {errors.sizes && (
+                                    <p className="text-red-500 text-sm mt-1">
+                                        {errors.sizes.message as string}
+                                    </p>
+                                )}
+                            </label>
+                        </div>
+
+                    </div>
+
+                    {/* Images */}
+                    <div className="mb-6">
+                        <label className="block mb-2">
+                            <span className="text-sm font-medium">Images</span>
+                            <input
+                                type="file"
+                                multiple
+                                accept="image/*"
+                                onChange={(e) => handleImagesChange(e.target.files)}
+                                className="mt-1 block w-full"
+                            />
+                            {/* hidden input to validate imgs */}
+
+                            {/* File input dùng Controller */}
+                            <Controller
+                                name="imgs"
+                                control={control}
+                                render={({ field }) => (
+                                    <input
+                                        type="file"
+                                        multiple
+                                        accept="image/*"
+                                        className="border p-2 rounded"
+                                        onChange={(e) => {
+                                            const files = e.target.files ?? new DataTransfer().files;
+                                            field.onChange(files); // ✅ cập nhật giá trị form
+                                            setValue("imgs", files, { shouldValidate: true }); // ✅ kích hoạt validate
+                                            handleImagesChange(e.target.files); // update preview
+                                        }}
+                                    />
+                                )}
+                            />
+
+                            {/* Hiển thị lỗi */}
+                            {errors.imgs && (
+                                <p className="text-red-500 text-sm mt-1">
+                                    {errors.imgs.message as string}
+                                </p>
+                            )}
+                        </label>
+
+                        <div className="flex gap-3 flex-wrap">
+                            {previews.map((src, i) => (
+                                <div
+                                    key={i}
+                                    className="w-24 h-24 rounded overflow-hidden border"
+                                >
+                                    <img
+                                        src={src}
+                                        alt={`preview-${i}`}
+                                        className="w-full h-full object-cover"
+                                    />
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    )
+}
