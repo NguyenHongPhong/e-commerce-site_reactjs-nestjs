@@ -25,6 +25,7 @@ export default function ProductForm() {
     const [isOpenForm, setIsOpneForm] = useState(false);
 
 
+    console.log(categories);
 
     // Preview cho ảnh sản phẩm
     const handleImagesChange = (files: FileList | null) => {
@@ -90,7 +91,7 @@ export default function ProductForm() {
         });
 
 
-        console.log("✅ Valid form data:", data);
+        // console.log("✅ Valid form data:", data);
 
 
         //         dispatch(enableLoading());
@@ -100,7 +101,6 @@ export default function ProductForm() {
                 dispatch(disableLoading());
                 notify(data.message, "success");
                 queryClient.invalidateQueries({ queryKey: ["products"] });
-                // navigate("/");
             },
             onError: (error: any) => {
                 dispatch(disableLoading());
@@ -152,8 +152,8 @@ export default function ProductForm() {
                         >
                             <option value="">Select category</option>
                             {categories.map((cat: any) => (
-                                <option key={cat.id} value={cat.id}>
-                                    {cat.name}
+                                <option key={cat.category_id} value={cat.category_id}>
+                                    {cat.title}
                                 </option>
                             ))}
                         </select>
@@ -187,21 +187,6 @@ export default function ProductForm() {
                     />
                     {errors.categoryDescription && (
                         <p className="text-red-500 text-sm">{errors.categoryDescription.message}</p>
-                    )}
-
-                    {/* Parent category optional */}
-                    {categories && categories.length > 0 && (
-                        <div>
-                            <label className="text-sm font-medium">Belong to</label>
-                            <select className="border p-2 rounded">
-                                <option value="">Select Parent Category</option>
-                                {categories.map((cat: any) => (
-                                    <option key={cat.id} value={cat.id}>
-                                        {cat.name}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
                     )}
 
                     {/* Multiple images required */}

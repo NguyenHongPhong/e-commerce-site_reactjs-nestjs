@@ -8,7 +8,7 @@ import { UserModule } from '@/user/user.module';
     imports: [PrismaModule, UserModule],
     controllers: [ShopperController],
     providers: [ShopperService, ShopperRepository],
-    exports: []
+    exports: [ShopperRepository]
 })
 export class ShopperModule { }
 

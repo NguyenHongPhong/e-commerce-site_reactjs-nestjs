@@ -1,1 +1,0 @@
-export { colorDto } from "./color.dto";

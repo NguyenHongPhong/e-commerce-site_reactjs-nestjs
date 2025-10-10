@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { ProductRepository } from './product.repository';
+import { ShopperRepository } from '@/shopper/shopper.repository';
 import {
     ProductDto, ImageDto, CategoryDto,
     createCategoryDro, createCategoryImgDto, CreateProductDto,
@@ -7,7 +8,9 @@ import {
 } from './dto';
 @Injectable()
 export class ProductService {
-    constructor(private readonly productRepo: ProductRepository
+    constructor(private readonly productRepo: ProductRepository,
+        private readonly shopperRepo: ShopperRepository
+
     ) { };
     normalizeName(text: string): string {
         return text
@@ -21,81 +24,100 @@ export class ProductService {
     }
 
 
-    async create(productData: ProductDto, productImgs: ImageDto[], categoryData: CategoryDto, categoryImgs: ImageDto[], idShop: string) {
-        const newCategory: createCategoryDro = {
-            name: categoryData.name!,
-            description: categoryData.description!,
-            slug: this.normalizeName(categoryData.name!),
-            id_shop: idShop
-        };
+    async create(
+        productData: ProductDto,
+        productImgs: ImageDto[],
+        categoryData: CategoryDto,
+        categoryImgs: ImageDto[],
+        idUser: string,
+    ) {
+        const shop = await this.shopperRepo.findShopperByIdUser(idUser);
+        if (!shop) throw new NotFoundException('Shop not found for this user');
 
-        /**Thêm category */
-        const { id } = await this.productRepo.createCategory(newCategory);
+        const idShop = shop.id;
+        let categoryId: number;
 
-        const categoryImages = categoryImgs.map((img) => {
-            const rs: createCategoryImgDto = {
-                category_id: id,
-                publicId: img.originalname!,
-                url: img.path!
+        return this.productRepo.$transaction(async (tx) => {
+
+            // 1️⃣ Xử lý Category
+            if (categoryData.selectCategory) {
+                categoryId = Number(categoryData.selectCategory);
+            } else {
+                const newCategory: createCategoryDro = {
+                    name: categoryData.name!,
+                    description: categoryData.description!,
+                    slug: this.normalizeName(categoryData.name!),
+                    id_shop: idShop,
+                };
+
+                const cateRs = await this.productRepo.createCategory(newCategory, tx);
+                categoryId = cateRs.id;
+
+                if (categoryImgs.length) {
+                    const categoryImages = categoryImgs.map((img) => ({
+                        category_id: categoryId,
+                        publicId: img.originalname!,
+                        url: img.path!,
+                    }));
+
+                    await this.productRepo.createCategoryImgs(categoryImages, tx);
+                }
             }
-            return rs;
-        });
 
-        /**Thêm ảnh category */
-        const categoryImageRs = await this.productRepo.createCategoryImgs(categoryImages);
+            // 2️⃣ Tạo Product
+            const newProduct = await this.productRepo.create({
+                title: productData.title!,
+                description: productData.description!,
+                price: Number(productData.price),
+                slug: this.normalizeName(productData.title!),
+                category_id: categoryId,
+                shop_id: idShop,
+            }, tx);
 
+            const productId = newProduct.id;
 
-        const newProduct: CreateProductDto = {
-            title: productData.title!,
-            description: productData.description!,
-            price: Number(productData.price!),
-            slug: this.normalizeName(productData.title!),
-            category_id: id,
-            shop_id: idShop
-        };
+            // 3️⃣ Tạo tất cả dữ liệu liên quan song song
+            const promises: Promise<any>[] = [];
 
-        /** Thêm product */
-
-        const { id: idProduct } = await this.productRepo.create(newProduct);
-
-        const productImages = productImgs.map((img) => {
-            const rs: createProductImgDto = {
-                product_id: idProduct,
-                public_Id: img.originalname!,
-                url: img.path!
+            // Ảnh product
+            if (productImgs.length) {
+                const productImageData = productImgs.map((img) => ({
+                    product_id: productId,
+                    public_Id: img.originalname,
+                    url: img.path,
+                }));
+                promises.push(this.productRepo.createProductImgs(productImageData as createProductImgDto[], tx));
             }
-            return rs;
-        });
 
-        /**Thêm ảnh product */
-        const prdImgs = await this.productRepo.createProductImgs(productImages);
-
-
-        /** Thêm màu cho sản phẩm */
-        const colors = productData.colors!.map((color) => {
-            const col: createProductColorDto = {
-                name: color,
-                product_id: idProduct
+            // Màu sắc
+            if (productData.colors?.length) {
+                const colorData = productData.colors.map((color) => ({
+                    product_id: productId,
+                    name: color,
+                }));
+                promises.push(this.productRepo.createProductColors(colorData, tx));
             }
-            return col;
-        })
 
-        const prdColor = await this.productRepo.createProductColors(colors);
-
-        /** Thêm chất liệu của sản phẩm */
-        const materials = productData.materials!.map((material) => {
-            const col: createProductColorDto = {
-                name: material,
-                product_id: idProduct
+            // Chất liệu
+            if (productData.materials?.length) {
+                const materialData = productData.materials.map((material) => ({
+                    product_id: productId,
+                    name: material,
+                }));
+                promises.push(this.productRepo.createProductMaterials(materialData, tx));
             }
-            return col;
-        })
 
-        const prdMaterial = await this.productRepo.createProductMaterials(materials);
+            // Thực hiện tất cả song song
+            await Promise.all(promises);
 
-
-
+            // 4️⃣ Trả kết quả
+            return {
+                statusCode: 201,
+                message: 'Created product successfully',
+            };
+        },);
     }
+
 
 
     async getAll() {
