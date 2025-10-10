@@ -66,7 +66,8 @@ export default function ProductForm() {
         const formData = new FormData();
         const categoryData: ICategoryDto = {
             name: data.categoryName,
-            description: data.categoryDescription
+            description: data.categoryDescription,
+            selectCategory: data.selectCategory
         }
         const productData: IProductDto = {
             title: data.title,
@@ -447,6 +448,15 @@ export default function ProductForm() {
                         </div>
                     </div>
                 </div>
+            </div>
+            {/* Buttons */}
+            <div className="flex gap-3">
+                <button
+                    type="submit"
+                    className="px-4 py-2 rounded-lg bg-blue-600 text-white"
+                >
+                    Save
+                </button>
             </div>
         </form>
     )

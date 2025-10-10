@@ -1,6 +1,7 @@
 export interface ICategoryDto {
     name?: string,
     description?: string,
+    selectCategory?: string
 };
 export interface IProductDto {
     title?: string,
