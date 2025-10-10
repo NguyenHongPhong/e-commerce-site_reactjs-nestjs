@@ -76,3 +76,19 @@
 .ReactTags__remove:hover {
     @apply text-red-700;
 }
+
+@keyframes glow {
+
+    0%,
+    100% {
+        text-shadow: 0 0 5px #00ffff, 0 0 10px #00ffff, 0 0 20px #00ffff;
+    }
+
+    50% {
+        text-shadow: 0 0 15px #00ffff, 0 0 30px #00ffff, 0 0 50px #00ffff;
+    }
+}
+
+.animate-glow {
+    animation: glow 2s ease-in-out infinite alternate;
+}

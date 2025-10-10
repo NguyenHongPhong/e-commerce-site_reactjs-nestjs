@@ -12,4 +12,15 @@ export class ShopperRepository {
         );
     }
 
+    async findShopperByIdUser(id: string) {
+        const rs = await this.prisma.shops.findUnique(
+            {
+                where: {
+                    user_id: id,
+                },
+            }
+        );
+        return rs;
+    }
+
 }

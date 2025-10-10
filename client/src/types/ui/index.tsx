@@ -86,17 +86,6 @@ export type TagProps = {
     field: string
 };
 
-export type FormCreateProductValues = {
-    title: string;
-    description: string;
-    price: number;
-    category: number | 0;
-    colors: string[];
-    materials: string[];
-    sizes: string[];
-    imgs: File[];
-};
-
 export interface IContact {
     newContact: string,
     contactRegistered: boolean

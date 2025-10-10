@@ -6,13 +6,7 @@ import { PrismaService } from './prisma/prisma.service';
 import { AuthModule } from './auth/auth.module';
 import { AuthMiddleware } from './common/middlewares/auth.middleware';
 import { OtpModule } from './otp/otp.module';
-import { CategoryModule } from './category/category.module';
-import { CategoryImagesModule } from './category_images/category_images.module';
 import { ProductModule } from './product/product.module';
-import { ColorModule } from './color/color.module';
-import { MaterialModule } from './material/material.module';
-import { SizeModule } from './size/size.module';
-import { ProductImgModule } from './product_img/product.img.module';
 import { ShopperModule } from './shopper/shopper.module';
 @Module({
     imports: [
@@ -23,13 +17,7 @@ import { ShopperModule } from './shopper/shopper.module';
         UserModule,
         AuthModule,
         OtpModule,
-        CategoryModule,
-        CategoryImagesModule,
         ProductModule,
-        ColorModule,
-        MaterialModule,
-        SizeModule,
-        ProductImgModule,
         ShopperModule
     ],
     controllers: [AppController],

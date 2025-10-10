@@ -1,6 +1,6 @@
 import { registerShopper } from '@api/shopper';
 import { useMutation, useQuery } from '@tanstack/react-query';
-
+import { getCategoriesByShop } from '@api/shopper';
 
 export const useRegisterShopperMutation = () => {
     return useMutation({
@@ -10,5 +10,12 @@ export const useRegisterShopperMutation = () => {
         }
     });
 };
+
+export const queryProductsByShop = (idShop: string) => {
+    return useQuery({
+        queryKey: ['productsByShop', idShop],
+        queryFn: () => getCategoriesByShop(idShop),
+    });
+}
 
 
