@@ -1,31 +1,14 @@
-import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
-import { CreateProductDto } from './dto';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { ProductRepository } from './product.repository';
-import { ColorRepository } from '@/color/color.repository';
-import { MaterialRepository } from '@/material/material.repository';
-import { SizeRepository } from '@/size/size.repository';
-import { ProductImgRepository } from '@/product_img/product.img.repository';
-import { PrismaService } from '@/prisma/prisma.service';
+import {
+    ProductDto, ImageDto, CategoryDto,
+    createCategoryDro, createCategoryImgDto, CreateProductDto,
+    createProductImgDto, createProductColorDto
+} from './dto';
 @Injectable()
 export class ProductService {
-    constructor(private readonly productRepo: ProductRepository,
-        private readonly colorRepo: ColorRepository,
-        private readonly materialRepo: MaterialRepository,
-        private readonly sizeRepo: SizeRepository,
-        private readonly productImgRepo: ProductImgRepository,
-        private readonly prisma: PrismaService
-    ) {
-
-    };
-    //Method to get files from Cloudinary
-    async uploadImages(files?: Express.Multer.File[]) {
-        if (!files || files.length === 0) return [];
-        return files.map(file => ({
-            url: file.path,
-            public_id: file.filename,
-        }));
-    }
-
+    constructor(private readonly productRepo: ProductRepository
+    ) { };
     normalizeName(text: string): string {
         return text
             .toLowerCase()
@@ -38,49 +21,80 @@ export class ProductService {
     }
 
 
-    async create(data: CreateProductDto, files: Express.Multer.File[]) {
-        return this.prisma.$transaction(async (tx) => {
-            // 1. Create product
-            const product = await tx.product.create({
-                data: {
-                    title: data.title,
-                    slug: this.normalizeName(data.title),
-                    description: data.description,
-                    price: data.price,
-                    category_id: data.category,
-                },
-            });
+    async create(productData: ProductDto, productImgs: ImageDto[], categoryData: CategoryDto, categoryImgs: ImageDto[], idShop: string) {
+        const newCategory: createCategoryDro = {
+            name: categoryData.name!,
+            description: categoryData.description!,
+            slug: this.normalizeName(categoryData.name!),
+            id_shop: idShop
+        };
 
-            // 2. Prepare related data
-            const colors = data.colors?.map((c) => ({ name: c, product_id: product.id })) ?? [];
-            const materials = data.materials?.map((m) => ({ name: m, product_id: product.id })) ?? [];
-            const sizes = data.sizes?.map((s) => ({ name: s, product_id: product.id })) ?? [];
+        /**Thêm category */
+        const { id } = await this.productRepo.createCategory(newCategory);
 
-            // Upload files and attach product_id
-            const imgs = await this.uploadImages(files);
-            const imgsWithProductId = imgs.map((img) => ({
-                url: img.url,
-                public_Id: img.public_id,
-                product_id: product.id,
-            }));
-
-            // 3. Insert relations in parallel
-            await Promise.all([
-                colors.length && tx.color.createMany({ data: colors, skipDuplicates: true }),
-                materials.length && tx.material.createMany({ data: materials, skipDuplicates: true }),
-                sizes.length && tx.size.createMany({ data: sizes, skipDuplicates: true }),
-                imgsWithProductId.length && tx.product_Images.createMany({ data: imgsWithProductId }),
-            ]);
-
-            // 4. Return standardized response
-            return {
-                statusCode: 201,
-                message: 'Product created successfully',
-                data: product,
-            };
-        }, {
-            timeout: 20000,
+        const categoryImages = categoryImgs.map((img) => {
+            const rs: createCategoryImgDto = {
+                category_id: id,
+                publicId: img.originalname!,
+                url: img.path!
+            }
+            return rs;
         });
+
+        /**Thêm ảnh category */
+        const categoryImageRs = await this.productRepo.createCategoryImgs(categoryImages);
+
+
+        const newProduct: CreateProductDto = {
+            title: productData.title!,
+            description: productData.description!,
+            price: Number(productData.price!),
+            slug: this.normalizeName(productData.title!),
+            category_id: id,
+            shop_id: idShop
+        };
+
+        /** Thêm product */
+
+        const { id: idProduct } = await this.productRepo.create(newProduct);
+
+        const productImages = productImgs.map((img) => {
+            const rs: createProductImgDto = {
+                product_id: idProduct,
+                public_Id: img.originalname!,
+                url: img.path!
+            }
+            return rs;
+        });
+
+        /**Thêm ảnh product */
+        const prdImgs = await this.productRepo.createProductImgs(productImages);
+
+
+        /** Thêm màu cho sản phẩm */
+        const colors = productData.colors!.map((color) => {
+            const col: createProductColorDto = {
+                name: color,
+                product_id: idProduct
+            }
+            return col;
+        })
+
+        const prdColor = await this.productRepo.createProductColors(colors);
+
+        /** Thêm chất liệu của sản phẩm */
+        const materials = productData.materials!.map((material) => {
+            const col: createProductColorDto = {
+                name: material,
+                product_id: idProduct
+            }
+            return col;
+        })
+
+        const prdMaterial = await this.productRepo.createProductMaterials(materials);
+
+
+
     }
 
 
