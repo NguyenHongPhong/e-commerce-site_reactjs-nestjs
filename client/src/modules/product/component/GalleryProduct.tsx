@@ -1,38 +1,47 @@
-import { IPropsGallery } from "@uiTypes/dto/product.dto";
 import { useState } from "react";
-const GalleryProduct = ({ images }: IPropsGallery) => {
-    const [indexImg, setIndexImages] = useState(0);
-    const widthPercent = 100 / images?.length;
+
+interface ProductGalleryProps {
+    images: { url: string; public_Id: string }[];
+}
+
+export default function ProductGallery({ images }: ProductGalleryProps) {
+    const [indexImg, setIndexImg] = useState(0);
+    const widthPercent = images ? 100 / images.length : 100;
 
     const handleChangeThumbnail = (index: number) => {
-        setIndexImages(index);
+        setIndexImg(index);
     };
 
     return (
-        <div className={`rounded-xl w-full h-[500px] relative`}>
+        <div className="rounded-xl w-full h-[500px] relative">
+            {/* Ảnh chính */}
             <img
                 src={images?.[indexImg]?.url}
                 alt={`product-${images?.[indexImg]?.public_Id}`}
                 className="w-full h-full object-cover object-center rounded-xl"
             />
 
+            {/* Thanh indicator top */}
             <div className="absolute top-3 left-0 flex w-full px-5 justify-between">
                 {images?.map((_, index) => (
-                    <div key={index} className={`h-1 rounded-md ${indexImg === index ? `rainbow-border` : `bg-[#c3c4c1]`}`}
+                    <div
+                        key={index}
+                        className={`h-1 rounded-md ${indexImg === index ? "rainbow-border" : "bg-[#c3c4c1]"
+                            }`}
                         style={{
                             width: `${widthPercent - 2}%`,
-                            minWidth: '1px'
+                            minWidth: "1px",
                         }}
-                    >
-                    </div>
+                    />
                 ))}
             </div>
 
+            {/* Thumbnails bottom */}
             <div className="absolute bottom-2 left-0 flex justify-between w-full px-3 hover:cursor-pointer">
                 {images?.map((img, index) => (
                     <div
                         key={index}
-                        className={`p-[3px] rounded-xl ${indexImg === index ? "rainbow-border" : "bg-white"
+                        className={`p-[3px] rounded-xl transition-all duration-300 hover:scale-105 ${indexImg === index ? "rainbow-border" : "bg-white"
                             }`}
                         style={{ width: `${widthPercent - 2}%` }}
                         onClick={() => handleChangeThumbnail(index)}
@@ -45,9 +54,6 @@ const GalleryProduct = ({ images }: IPropsGallery) => {
                     </div>
                 ))}
             </div>
-
         </div>
-    )
+    );
 }
-
-export default GalleryProduct;
