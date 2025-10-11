@@ -1,6 +1,6 @@
 import { createProduct } from '@api/product';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { getProducts } from '@api/product';
+import { getProducts, getCategories } from '@api/product';
 
 
 export const useCreateProductMutation = () => {
@@ -16,6 +16,13 @@ export const useGetAllProductMutation = () => {
     return useQuery({
         queryKey: ['products'],
         queryFn: getProducts,
+    });
+}
+
+export const useGetAllCategoryMutation = () => {
+    return useQuery({
+        queryKey: ['categories'],
+        queryFn: getCategories,
     });
 }
 

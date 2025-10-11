@@ -34,4 +34,9 @@ export class ProductController {
     getProducts() {
         return this.productService.getAll();
     }
+    @Get('getListCategory')
+    getCategoryList() {
+        return this.productService.getAllCategory();
+    }
+
 }

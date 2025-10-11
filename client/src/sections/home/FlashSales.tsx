@@ -17,7 +17,7 @@ export default () => {
                     </button>
                 </div>
                 <div className="flex justify-between mt-7">
-                    <Link to={""} className=" h-52 w-44 hover:shadow-2xl relative group">
+                    <Link to={"/product/test/adđ"} className=" h-52 w-44 hover:shadow-2xl relative group">
                         <div className="bg-[url(../../../public/ui/images/shirt.png)] bg-cover w-full h-3/4 absolute
                         bg-center group-hover:scale-95"></div>
                         <div className="absolute left-0 h-4 w-2/6 bg-blue-600  rounded-tr-[2px]

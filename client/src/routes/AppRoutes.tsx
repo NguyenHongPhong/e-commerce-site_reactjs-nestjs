@@ -9,7 +9,7 @@ import RecoveryPassword from "../pages/recovery/RecoveryPassword";
 import RecoverLayout from "../layouts/RecoverLayout";
 import VerifyOTP from "../pages/recovery/VerifyOTP";
 import ResetPassword from "../pages/recovery/ResetPassword";
-import ProductPage from "@pages/product/index";
+import ProductPage from "@pages/product/createPage";
 import { AuthenticationUser } from "@components/protectedRoute/AuthenticationUser";
 import { useDispatch } from "react-redux";
 import { authenticated, unauthenticated } from "@reducers/auth";
@@ -17,6 +17,7 @@ import { useEffect } from "react";
 import { useGetProfileQuery } from "@modules/auth/queries";
 import ShopperLayout from "@layouts/ShopperLayout";
 import { RegisterShpperPage } from "@pages/shopper/register";
+import DetailPage from "@pages/product/detailPage";
 function AppRoutes() {
     const { data: profile, error, isError, isLoading } = useGetProfileQuery();
     const dispatch = useDispatch();
@@ -71,8 +72,11 @@ function AppRoutes() {
                 <Route path="product">
                     {/* <Route index element={<ProductList />} /> */}
                     <Route path="create" element={<ProductPage />} />
-                    {/* <Route path="edit/:id" element={<ProductEdit />} /> */}
                 </Route>
+            </Route>
+
+            <Route path="product">
+                <Route path=":slug/:id" element={<DetailPage />} />
             </Route>
         </Routes>
     );

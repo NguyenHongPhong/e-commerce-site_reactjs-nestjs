@@ -12,3 +12,7 @@ export const getProducts = async () => {
     return res.data;
 }
 
+export const getCategories = async () => {
+    const res = await api.get(API_BASE + '/getListCategory');
+    return res.data;
+}

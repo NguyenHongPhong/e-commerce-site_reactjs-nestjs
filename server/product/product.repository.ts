@@ -83,4 +83,15 @@ export class ProductRepository extends BaseRepository {
             },
         });
     };
+
+    async getAllCategory() {
+        return this.prisma.category.findMany({
+            include: {
+                images: true
+            },
+            orderBy: {
+                createdAt: 'desc',
+            },
+        });
+    };
 }

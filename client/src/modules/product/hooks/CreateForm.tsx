@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, ChangeEvent } from "react";
 import { useForm, Controller } from "react-hook-form";
 import Tags from "@components/tag/Tag";
 import { useCreateProductMutation, } from "../queries";
@@ -23,9 +23,6 @@ export default function ProductForm() {
     const [preview, setPreview] = useState<string[]>([]);
     const [files, setFiles] = useState<File[]>([]);
     const [isOpenForm, setIsOpneForm] = useState(false);
-
-
-    console.log(categories);
 
     // Preview cho ảnh sản phẩm
     const handleImagesChange = (files: FileList | null) => {
@@ -118,6 +115,10 @@ export default function ProductForm() {
         }
     };
 
+    const handleCreateNewCategory = (e: ChangeEvent<HTMLInputElement>) => {
+        setIsOpneForm(e.target.checked);
+        setValue("selectCategory", "NONE");
+    }
 
     return (
         <form
@@ -134,7 +135,7 @@ export default function ProductForm() {
                         <span className="font-bold">Select available categories</span>
                     </div>
                     <div className="flex gap-2">
-                        <input type="radio" checked={isOpenForm} onChange={(e) => setIsOpneForm(e.target.checked)} className="hover:cursor-pointer" />
+                        <input type="radio" checked={isOpenForm} onChange={handleCreateNewCategory} className="hover:cursor-pointer" />
                         <span className="font-bold">Create new category</span>
                     </div>
                 </div>

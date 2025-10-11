@@ -40,7 +40,7 @@ export class ProductService {
         return this.productRepo.$transaction(async (tx) => {
 
             // 1️⃣ Xử lý Category
-            if (categoryData.selectCategory) {
+            if (categoryData.selectCategory && categoryData.selectCategory !== "NONE") {
                 categoryId = Number(categoryData.selectCategory);
             } else {
                 const newCategory: createCategoryDro = {
@@ -118,12 +118,18 @@ export class ProductService {
         },);
     }
 
-
-
     async getAll() {
         const products = await this.productRepo.getAll();
         if (products) {
             return products;
+        }
+        throw new NotFoundException("Not found products");
+    }
+
+    async getAllCategory() {
+        const categories = await this.productRepo.getAllCategory();
+        if (categories) {
+            return categories;
         }
         throw new NotFoundException("Not found products");
     }
