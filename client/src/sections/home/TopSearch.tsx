@@ -4,8 +4,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useGetAllProductMutation } from "@modules/product/queries";
 const TopSearch = () => {
     const { data: products } = useGetAllProductMutation();
-
-    return (<div className="@container">
+    return (<div>
         <div>
             <div className="flex justify-between">
                 <div className="flex">
@@ -17,7 +16,7 @@ const TopSearch = () => {
             </div>
             <div className="flex justify-between mt-7">
                 {products?.map((product: any, i: number) => (
-                    <Link key={i} to={""} className=" h-52 w-44 hover:shadow-2xl relative group">
+                    <Link key={i} to={`/product/${product.slug}/${product.id}`} className=" h-52 w-44 hover:shadow-2xl relative group">
                         <div className={` bg-cover w-full h-3/4 absolute
                         bg-center group-hover:scale-95`}
                             style={{ backgroundImage: `url(${product.product_Images?.[0]?.url})` }}

@@ -92,3 +92,25 @@
 .animate-glow {
     animation: glow 2s ease-in-out infinite alternate;
 }
+
+
+@keyframes rainbowMove {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+.rainbow-border {
+    background: linear-gradient(270deg,
+            red, orange, yellow, green, blue, indigo, violet, red);
+    background-size: 400% 400%;
+    animation: rainbowMove 3s linear infinite;
+}

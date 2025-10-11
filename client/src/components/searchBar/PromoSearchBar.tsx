@@ -2,7 +2,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faMagnifyingGlass, faCartShopping } from '@fortawesome/free-solid-svg-icons';
 function PromoSearchBar() {
     return (
-        <div className="@container">
+        <div>
             <div className="flex items-center justify-between">
                 <div className="bg-[url(/public/ui/images/flash-sale.gif)] h-52 w-3/12 bg-cover bg-center"></div>
                 <div className="w-2/5 flex items-center border-2 border-b-black rounded-2xl h-fit p-2">

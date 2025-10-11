@@ -2,7 +2,7 @@ import { useGetAllCategoryMutation } from "@modules/product/queries";
 import Category from "@components/category/Category";
 export default function () {
   const { data: categories } = useGetAllCategoryMutation();
-  return (<div className="@container">
+  return (<div>
     <div className="w-full">
       <h2 className="text-2xl font-bold leading-8 text-(--color-primary-500)">CATEGORIES</h2>
       <div className="flex flex-wrap justify-center mt-4">

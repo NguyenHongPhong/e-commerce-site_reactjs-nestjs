@@ -10,5 +10,16 @@ export interface IProductDto {
     materials?: string[],
     sizes?: string[],
     price?: string,
-
 }
+
+export interface IGalleryProductDto {
+    id: string,
+    url: string,
+    public_Id: string,
+    product_id: string
+}
+
+export interface IPropsGallery {
+    images: IGalleryProductDto[]
+}
+

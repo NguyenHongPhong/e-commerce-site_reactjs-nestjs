@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faFacebook, faLinkedinIn, faXTwitter } from '@fortawesome/free-brands-svg-icons';
 function Footer() {
     return (<footer>
-        <div className="@container">
+        <div>
             <div className="flex justify-between">
                 <div>
                     <Link to="/" className="grow flex items-center">

@@ -4,13 +4,13 @@ import Header from "../components/header/Header";
 
 function MainLayout() {
     return (
-        <>
+        <div className="@container">
             <Header></Header>
             <main>
                 <Outlet />
             </main>
             <Footer></Footer>
-        </>
+        </div>
     )
 }
 

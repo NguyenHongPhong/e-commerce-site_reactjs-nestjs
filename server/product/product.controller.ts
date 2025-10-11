@@ -1,4 +1,4 @@
-import { Controller, Post, Body, UploadedFiles, UseInterceptors, Get, UseGuards, Req } from '@nestjs/common';
+import { Controller, Post, Body, UploadedFiles, UseInterceptors, Get, UseGuards, Req, Param } from '@nestjs/common';
 import { AnyFilesInterceptor } from '@nestjs/platform-express';
 import { MulterUploadOptions } from '@/config/cloudinary.config';
 import { ProductService } from './product.service';
@@ -34,9 +34,15 @@ export class ProductController {
     getProducts() {
         return this.productService.getAll();
     }
+
     @Get('getListCategory')
     getCategoryList() {
         return this.productService.getAllCategory();
+    }
+
+    @Get("getProductById/:id")
+    getPeoductById(@Param('id') id: string) {
+        return this.productService.getProductById(id);
     }
 
 }

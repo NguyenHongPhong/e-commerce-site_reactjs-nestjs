@@ -23,4 +23,10 @@ export class ShopperRepository {
         return rs;
     }
 
+    async findShopById(id: string) {
+        const res = await this.prisma.shops.findUnique(
+            { where: { id: id } }
+        )
+        return res;
+    }
 }

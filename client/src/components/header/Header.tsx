@@ -20,7 +20,7 @@ function Header() {
 
 
     return (<header>
-        <div className="@container">
+        <div>
             <div className="flex justify-between">
                 <Link to="/" className="grow flex items-center">
                     <div className="flex items-center">

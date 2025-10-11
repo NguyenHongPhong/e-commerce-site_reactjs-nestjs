@@ -56,7 +56,7 @@ function Slider() {
 
 
 
-    return (<div className="@container">
+    return (<div>
         <div className="flex justify-between">
             <div className="w-[70%] h-80 rounded-lg ">
                 <div id="banner" className={`w-full h-full rounded-lg relative transition-opacity duration-500 ease-in-out opacity-100`} style={{

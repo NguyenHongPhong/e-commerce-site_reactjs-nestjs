@@ -75,7 +75,8 @@ function AppRoutes() {
                 </Route>
             </Route>
 
-            <Route path="product">
+            {/**Detail product */}
+            <Route path="product" element={<MainLayout />}>
                 <Route path=":slug/:id" element={<DetailPage />} />
             </Route>
         </Routes>

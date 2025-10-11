@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 
 export default () => {
     return (
-        <div className="@container">
+        <div>
             <div>
                 <div className="flex justify-between">
                     <div className="flex">

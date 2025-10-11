@@ -134,4 +134,34 @@ export class ProductService {
         throw new NotFoundException("Not found products");
     }
 
+    async getProductById(idClient: string) {
+        const product = await this.productRepo.getProductById(idClient);
+
+        if (!product) {
+            throw new NotFoundException("Not found product");
+        }
+
+        const shop = await this.shopperRepo.findShopById(product.shop_id);
+        const category = await this.productRepo.getCategoryById(product.category_id);
+
+        if (!shop) {
+            throw new NotFoundException("Not found shop");
+        }
+
+        if (!category) {
+            throw new NotFoundException("Not found category");
+        }
+
+
+        const { id, shop_id, ...restProduct } = product;
+        const { name } = shop;
+        const { name: categoryName } = category;
+
+        return {
+            product: restProduct,
+            shop: name,
+            category: categoryName
+        };
+    }
+
 }

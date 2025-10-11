@@ -94,4 +94,28 @@ export class ProductRepository extends BaseRepository {
             },
         });
     };
+
+    async getProductById(id: string) {
+        const res = await this.prisma.product.findUnique({
+            where: { id: id },
+            include: {
+                colors: true,
+                materials: true,
+                product_Images: true,
+                rates: true,
+                sizes: true
+            }
+        })
+
+        return res;
+    }
+
+    async getCategoryById(id: number) {
+        const res = await this.prisma.category.findUnique(
+            {
+                where: { id: id },
+            }
+        )
+        return res;
+    }
 }

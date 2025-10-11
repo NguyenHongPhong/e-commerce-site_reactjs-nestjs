@@ -5,7 +5,7 @@ import { useGetAllProductMutation } from "@modules/product/queries";
 const Recommendation = () => {
     const { data: products } = useGetAllProductMutation();
 
-    return (<div className="@container">
+    return (<div>
         <div>
             <div className="text-center">
                 <h3 className="font-medium">RECOMMENDATION TODAY</h3>
