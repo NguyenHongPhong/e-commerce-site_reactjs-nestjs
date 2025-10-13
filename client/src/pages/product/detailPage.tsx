@@ -257,7 +257,7 @@ function DetailPage() {
                                     </div>
                                 </div>
                             </div>
-                            <div className="w-1/2 p-5">
+                            <div className="w-1/2">
                                 <CustomCarousel />
                             </div>
                         </div>
