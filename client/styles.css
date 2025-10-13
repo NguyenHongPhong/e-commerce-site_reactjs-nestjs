@@ -115,3 +115,8 @@
     background-size: 400% 400%;
     animation: rainbowMove 3s linear infinite;
 }
+
+
+.react-multi-carousel-list ul {
+    width: 100%;
+}

@@ -38,6 +38,7 @@ export default function ProductForm() {
         handleSubmit,
         formState: { errors },
         setValue,
+        reset
     } = useForm<ProductFormValues>(
         {
             resolver: zodResolver(productSchema),
@@ -97,6 +98,7 @@ export default function ProductForm() {
             onSuccess: (data: any) => {
                 dispatch(disableLoading());
                 notify(data.message, "success");
+                reset();
                 queryClient.invalidateQueries({ queryKey: ["products"] });
             },
             onError: (error: any) => {

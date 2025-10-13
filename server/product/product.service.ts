@@ -107,6 +107,15 @@ export class ProductService {
                 promises.push(this.productRepo.createProductMaterials(materialData, tx));
             }
 
+            // Size
+            if (productData.sizes?.length) {
+                const sizesData = productData.sizes.map((size) => ({
+                    product_id: productId,
+                    name: size,
+                }));
+                promises.push(this.productRepo.createProductSizes(sizesData, tx));
+            }
+
             // Thực hiện tất cả song song
             await Promise.all(promises);
 

@@ -1,3 +1,5 @@
+import { ReactElement } from "react"
+
 export interface ICategoryDto {
     name?: string,
     description?: string,
@@ -23,3 +25,12 @@ export interface IPropsGallery {
     images: IGalleryProductDto[]
 }
 
+export interface ITag {
+    idx: number,
+    label: string,
+    content: ReactElement
+}
+
+export interface ITags {
+    tags: ITag[];
+}

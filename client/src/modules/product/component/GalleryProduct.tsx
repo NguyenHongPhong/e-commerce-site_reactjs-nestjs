@@ -7,18 +7,19 @@ interface ProductGalleryProps {
 export default function ProductGallery({ images }: ProductGalleryProps) {
     const [indexImg, setIndexImg] = useState(0);
     const widthPercent = images ? 100 / images.length : 100;
+    if (!images) return <p>Loading.....</p>
 
     const handleChangeThumbnail = (index: number) => {
         setIndexImg(index);
     };
 
     return (
-        <div className="rounded-xl w-full h-[500px] relative">
+        <div className="rounded-xl w-full h-full relative shadow-xl overflow-hidden">
             {/* Ảnh chính */}
             <img
                 src={images?.[indexImg]?.url}
                 alt={`product-${images?.[indexImg]?.public_Id}`}
-                className="w-full h-full object-cover object-center rounded-xl"
+                className="w-full h-[700px] object-cover object-center rounded-xl"
             />
 
             {/* Thanh indicator top */}
@@ -47,7 +48,7 @@ export default function ProductGallery({ images }: ProductGalleryProps) {
                         onClick={() => handleChangeThumbnail(index)}
                     >
                         <img
-                            className="rounded-xl h-28 w-full object-cover object-center"
+                            className="rounded-xl h-28 w-full object-cover object-center shadow-xl"
                             src={img.url}
                             alt={`thumbnail-${index}`}
                         />

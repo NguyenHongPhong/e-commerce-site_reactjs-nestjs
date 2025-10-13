@@ -95,3 +95,14 @@ export class createProductMaterialDto {
 
 }
 
+
+export class createProductSizeDto {
+    @IsString()
+    @IsNotEmpty()
+    product_id!: string;
+
+    @IsString()
+    @IsNotEmpty()
+    name!: string;
+}
+
