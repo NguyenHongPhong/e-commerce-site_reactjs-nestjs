@@ -6,8 +6,16 @@ interface ProductGalleryProps {
 
 export default function ProductGallery({ images }: ProductGalleryProps) {
     const [indexImg, setIndexImg] = useState(0);
-    const widthPercent = images ? 100 / images.length : 100;
     if (!images) return <p>Loading.....</p>
+
+
+    let widthPercent = images ? 100 / images.length : 100;
+    let gap = "justify-between";
+
+    if (images.length <= 4) {
+        widthPercent = 130;
+        gap = "gap-3";
+    }
 
     const handleChangeThumbnail = (index: number) => {
         setIndexImg(index);
@@ -38,13 +46,13 @@ export default function ProductGallery({ images }: ProductGalleryProps) {
             </div>
 
             {/* Thumbnails bottom */}
-            <div className="absolute bottom-2 left-0 flex justify-between w-full px-3 hover:cursor-pointer">
+            <div className={`absolute bottom-2 left-0 flex w-full px-3 hover:cursor-pointer ${gap}`}>
                 {images?.map((img, index) => (
                     <div
                         key={index}
                         className={`p-[3px] rounded-xl transition-all duration-300 hover:scale-105 ${indexImg === index ? "rainbow-border" : "bg-white"
                             }`}
-                        style={{ width: `${widthPercent - 2}%` }}
+                        style={{ width: `${images.length <= 4 ? widthPercent + `px` : widthPercent - 2 + "%"}` }}
                         onClick={() => handleChangeThumbnail(index)}
                     >
                         <img

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, ChangeEvent } from "react";
-import { useForm, Controller } from "react-hook-form";
+import { useForm, Controller, useFieldArray } from "react-hook-form";
 import Tags from "@components/tag/Tag";
 import { useCreateProductMutation, } from "../queries";
 import { useAppDispatch } from "hooks";
@@ -11,6 +11,8 @@ import { useNavigate } from "react-router-dom";
 import { ProductFormValues, productSchema } from "schema/productSchema.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ICategoryDto, IProductDto } from "@uiTypes/dto/product.dto";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faSquarePlus, faXmark } from "@fortawesome/free-solid-svg-icons";
 export default function ProductForm() {
 
     const navigate = useNavigate();
@@ -52,10 +54,15 @@ export default function ProductForm() {
                 colors: [],
                 materials: [],
                 sizes: [],
+                features: [{ value: "" }]
             },
             mode: "onSubmit",
         });
 
+    const { fields, append, remove } = useFieldArray({
+        control,
+        name: "features",
+    });
     useEffect(() => {
         setValue("_categoriesExist", !!(categories && categories.length > 0));
     }, [categories, setValue]);
@@ -72,6 +79,7 @@ export default function ProductForm() {
             title: data.title,
             colors: data.colors,
             description: data.description,
+            features: data.features,
             materials: data.materials,
             price: data.price,
             sizes: data.sizes
@@ -87,12 +95,7 @@ export default function ProductForm() {
         Array.from(data.imgs ?? []).forEach((file) => {
             formData.append("productImgs", file as File); // ⚡ type assertion
         });
-
-
-        // console.log("✅ Valid form data:", data);
-
-
-        //         dispatch(enableLoading());
+        dispatch(enableLoading());
 
         createProductMutation.mutate(formData, {
             onSuccess: (data: any) => {
@@ -265,6 +268,29 @@ export default function ProductForm() {
                         {errors.description && (
                             <p className="text-red-500 text-sm mt-1">
                                 {String(errors.description.message)}
+                            </p>
+                        )}
+                    </label>
+
+                    {/* Features */}
+                    <label className="block mb-3">
+                        <span className="text-sm font-medium">Features</span>
+                        {fields.map((field, index) => (
+                            <div key={field.id} className="flex gap-2 my-2 items-center">
+                                <input
+                                    {...register(`features.${index}.value`)}
+                                    className="border px-2 py-1 rounded-lg"
+                                    placeholder={`Feature ${index + 1}`}
+                                />
+                                <FontAwesomeIcon icon={faXmark} className="text-red-500 hover:cursor-pointer" onClick={() => remove(index)} />
+                            </div>
+                        ))}
+
+                        <FontAwesomeIcon icon={faSquarePlus} className={`hover:cursor-pointer text-cyan-600 translate-y-0.5 ${fields.length > 0 ? `` : `ml-2`}`} size="1x" onClick={() => append({ value: "" })} />
+
+                        {errors.features && (
+                            <p className="text-red-500 text-sm mt-1">
+                                {String(errors.features.message)}
                             </p>
                         )}
                     </label>

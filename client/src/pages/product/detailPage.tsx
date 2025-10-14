@@ -7,6 +7,8 @@ import { faHeart } from "@fortawesome/free-regular-svg-icons";
 import { useState } from "react";
 import Tabs from "@components/tabs";
 import CustomCarousel from "@components/carousel";
+import { ICommentUser, IResponsiveCasourel, ISimilarProduct } from "@uiTypes/dto/product.dto";
+import { StarRating } from "@components/StarRating";
 function DetailPage() {
     const { id } = useParams();
     const { data: product } = useGetProductByIdQuery(id!);
@@ -14,6 +16,23 @@ function DetailPage() {
     if (!product) {
         return (<p>Loading......</p>)
     }
+    const review: ICommentUser[] = [{ name: "Nguyễn Văn a", content: "Sản phẩm rất tốt", rate: 5, commentedAt: "14 Otcober 2025" },
+    { name: "Nguyễn Văn B", content: "Sản phẩm khá ổn so với mức giá", rate: 4, commentedAt: "16 Otcober 2025" },
+    { name: "Nguyễn Văn C", content: "Sản phẩm chưa đáp ứng được yêu cầu. mức giá ổn", rate: 3, commentedAt: "18 Otcober 2025" },
+    { name: "Nguyễn Văn D", content: "Sản phẩm khá tệ", rate: 2, commentedAt: "20 Otcober 2025" }
+    ];
+
+    let productsByCategory: ISimilarProduct[] = [];
+
+    if (product.productsByCategory) {
+        productsByCategory = product.productsByCategory;
+    }
+    const defaultResponsive: IResponsiveCasourel = {
+        superLargeDesktop: { breakpoint: { max: 4000, min: 3000 }, items: 1 },
+        desktop: { breakpoint: { max: 3000, min: 1024 }, items: 1 },
+        tablet: { breakpoint: { max: 1024, min: 464 }, items: 1 },
+        mobile: { breakpoint: { max: 464, min: 0 }, items: 1 },
+    };
     product && console.log(product);
     return (
         <div className="py-10 flex flex-col gap-10">
@@ -28,7 +47,7 @@ function DetailPage() {
                 <div className="w-1/2">
                     <GalleryProduct images={product?.product.product_Images} />
                 </div>
-                <div className="w-1/2 bg-black/5 rounded-2xl">
+                <div className="w-1/2 bg-[#f6f6f6] rounded-2xl">
                     <div className="p-4 flex flex-col gap-4">
                         <h2 className="text-2xl font-semibold">{product?.product.title}</h2>
 
@@ -40,7 +59,8 @@ function DetailPage() {
 
                             <div className="flex gap-2">
                                 {product?.product?.colors?.map((col: any, index: number) =>
-                                (<span className="py-1 px-2 rounded-md bg-[#ededf6] text-cyan-700 text-base hover:cursor-pointer hover:bg-cyan-100
+                                (<span className="py-1 px-2 rounded-md bg-[#ededf6] text-cyan-700 text-base hover:cursor-pointer
+                                     hover:bg-white hover:text-cyan-500
                                     " key={index}>{col.name}</span>))}
                             </div>
                         </div>
@@ -54,7 +74,7 @@ function DetailPage() {
                             <div className="flex gap-2">
                                 {product?.product?.materials?.map((mat: any, index: number) =>
                                 (<span className="py-1 px-2 rounded-md bg-[#ededf6] text-cyan-700 text-base hover:cursor-pointer
-                                     hover:bg-cyan-100 font-sans
+                                     hover:bg-white hover:text-cyan-500 font-sans
                                     " key={index}>{mat.name}</span>))}
                             </div>
                         </div>
@@ -68,7 +88,7 @@ function DetailPage() {
                             <div className="flex gap-2">
                                 {product?.product?.sizes?.map((size: any, index: number) =>
                                 (<span className="py-1 px-2 rounded-md bg-[#ededf6] text-cyan-700 text-base hover:cursor-pointer
-                                     hover:bg-cyan-100 font-sans
+                                     hover:bg-white hover:text-cyan-500 font-sans
                                     " key={index}>{size.name}</span>))}
                             </div>
                         </div>
@@ -167,9 +187,10 @@ function DetailPage() {
                 <Tabs tags={[{
                     idx: 0,
                     label: "Description",
-                    content: <div>
-                        <p>{product.product.description}</p>
-                    </div>
+                    content:
+                        <div>
+                            <p>{product.product.description}</p>
+                        </div>
                 },
                 {
                     idx: 1,
@@ -258,7 +279,41 @@ function DetailPage() {
                                 </div>
                             </div>
                             <div className="w-1/2">
-                                <CustomCarousel />
+                                <CustomCarousel responsiveCasourel={defaultResponsive}
+                                    items={review} fullSlider={true}
+                                    renderItem={(item: ICommentUser, idx: number) => (
+                                        <div
+                                            key={idx}
+                                            className="rounded-lg border-2 border-[#f7f7f7] w-11/12 px-3 py-2"
+                                        >
+                                            <div className="flex flex-col gap-4">
+                                                {/* Portrait and name */}
+                                                <div className="flex gap-2 items-center">
+                                                    <img
+                                                        className="w-10 h-10 rounded-full mr-2"
+                                                        src={`/public/ui/images/defaut-portrait.jfif`}
+                                                        alt=""
+                                                    />
+                                                    <span className="font-medium">{item.name}</span>
+                                                </div>
+
+                                                {/* Rate + Date */}
+                                                <div className="flex gap-2 items-center justify-between ">
+                                                    <span className="flex gap-2">
+                                                        {Array.from({ length: item.rate }).map((_, i) => (
+                                                            <FontAwesomeIcon icon={faStar} color="#ffb700" />
+                                                        ))}
+                                                    </span>
+                                                    <span className="text-[#aeaeae]">{item.commentedAt}</span>
+                                                </div>
+
+                                                {/* Comment */}
+                                                <p className="text-[#aeaeae]">
+                                                    {`"${item.content}"`}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    )} />
                             </div>
                         </div>
                     </div>
@@ -267,12 +322,37 @@ function DetailPage() {
                     idx: 3,
                     label: "Similar",
                     content: <div>
-                        <ul>
-                            <li>similiar</li>
-                            <li>a</li>
-                            <li>a</li>
-                            <li>a</li>
-                        </ul>
+                        <CustomCarousel responsiveCasourel={{
+                            superLargeDesktop: { breakpoint: { max: 4000, min: 3000 }, items: 5 },
+                            desktop: { breakpoint: { max: 3000, min: 1024 }, items: 1 },
+                            tablet: { breakpoint: { max: 1024, min: 464 }, items: 1 },
+                            mobile: { breakpoint: { max: 464, min: 0 }, items: 1 },
+                        }}
+                            items={productsByCategory}
+                            renderItem={(item: ISimilarProduct, idx: number) => (
+                                <div
+                                    key={idx}
+                                    className="rounded-lg border-2 border-[#f7f7f7] w-48 h-60 px-3 py-2 hover:shadow-xl hover:cursor-pointer group"
+                                >
+                                    <div className="flex flex-col gap-2">
+                                        <div >
+                                            <img src={item.product_Images.length > 1 ? item.product_Images[1].url : item.product_Images[0].url} className="w-full h-32 rounded" alt="" />
+                                        </div>
+                                        <div className="flex flex-col gap-1 text-[12px]">
+                                            <span className="font-semibold">{item.title}</span>
+                                            <span className="truncate">{item.description}</span>
+                                            <div className="flex gap-2">
+                                                <div>
+                                                    <StarRating rating={3} size={12} />
+                                                </div>
+                                                <div>(3.5) reviews</div>
+                                            </div>
+                                            <button className="rounded bg-[#ffb700] group-hover:opacity-90 group-hover:cursor-pointer
+                                             p-1 font-semibold text-md text-white/85">View detail</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            )} />
                     </div>
                 }
                 ]} />

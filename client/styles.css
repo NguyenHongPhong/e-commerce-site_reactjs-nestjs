@@ -117,6 +117,10 @@
 }
 
 
-.react-multi-carousel-list ul {
-    width: 100%;
+@layer utilities {
+    .carousel-fit {
+        width: fit-content !important;
+        flex: 0 0 auto !important;
+        margin-right: 8px;
+    }
 }
