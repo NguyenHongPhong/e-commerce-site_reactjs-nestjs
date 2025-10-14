@@ -3,8 +3,8 @@ import { ProductRepository } from './product.repository';
 import { ShopperRepository } from '@/shopper/shopper.repository';
 import {
     ProductDto, ImageDto, CategoryDto,
-    createCategoryDro, createCategoryImgDto, CreateProductDto,
-    createProductImgDto, createProductColorDto
+    createCategoryDro, createProductFeatureDto,
+    createProductImgDto,
 } from './dto';
 @Injectable()
 export class ProductService {
@@ -59,7 +59,6 @@ export class ProductService {
                         publicId: img.originalname!,
                         url: img.path!,
                     }));
-
                     await this.productRepo.createCategoryImgs(categoryImages, tx);
                 }
             }
@@ -76,56 +75,62 @@ export class ProductService {
 
             const productId = newProduct.id;
 
-            // 3️⃣ Tạo tất cả dữ liệu liên quan song song
-            const promises: Promise<any>[] = [];
+            // 3️⃣ Tạo dữ liệu liên quan TUẦN TỰ
 
-            // Ảnh product
+            // Features
+            if (productData.features?.length) {
+                const featureData = productData.features.map((feat) => ({
+                    product_id: productId,
+                    feature: feat,
+                }));
+                await this.productRepo.createProductFeatures(featureData, tx);
+            }
+
+            // Product images
             if (productImgs.length) {
                 const productImageData = productImgs.map((img) => ({
                     product_id: productId,
                     public_Id: img.originalname,
                     url: img.path,
                 }));
-                promises.push(this.productRepo.createProductImgs(productImageData as createProductImgDto[], tx));
+                await this.productRepo.createProductImgs(productImageData as createProductImgDto[], tx);
             }
 
-            // Màu sắc
+            // Colors
             if (productData.colors?.length) {
                 const colorData = productData.colors.map((color) => ({
                     product_id: productId,
                     name: color,
                 }));
-                promises.push(this.productRepo.createProductColors(colorData, tx));
+                await this.productRepo.createProductColors(colorData, tx);
             }
 
-            // Chất liệu
+            // Materials
             if (productData.materials?.length) {
                 const materialData = productData.materials.map((material) => ({
                     product_id: productId,
                     name: material,
                 }));
-                promises.push(this.productRepo.createProductMaterials(materialData, tx));
+                await this.productRepo.createProductMaterials(materialData, tx);
             }
 
-            // Size
+            // Sizes
             if (productData.sizes?.length) {
                 const sizesData = productData.sizes.map((size) => ({
                     product_id: productId,
                     name: size,
                 }));
-                promises.push(this.productRepo.createProductSizes(sizesData, tx));
+                await this.productRepo.createProductSizes(sizesData, tx);
             }
-
-            // Thực hiện tất cả song song
-            await Promise.all(promises);
 
             // 4️⃣ Trả kết quả
             return {
                 statusCode: 201,
                 message: 'Created product successfully',
             };
-        },);
+        });
     }
+
 
     async getAll() {
         const products = await this.productRepo.getAll();
@@ -161,6 +166,11 @@ export class ProductService {
             throw new NotFoundException("Not found category");
         }
 
+        const productsByCategory = await this.productRepo.getProductsByCategory(category.id);
+
+        if (!productsByCategory) {
+            throw new NotFoundException("Not found any product from this category " + category.id);
+        }
 
         const { id, shop_id, ...restProduct } = product;
         const { name } = shop;
@@ -169,7 +179,8 @@ export class ProductService {
         return {
             product: restProduct,
             shop: name,
-            category: categoryName
+            category: categoryName,
+            productsByCategory
         };
     }
 

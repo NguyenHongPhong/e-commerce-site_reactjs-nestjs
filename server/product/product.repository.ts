@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import {
     createCategoryImgDto, createCategoryDro,
     CreateProductDto, createProductImgDto, createProductColorDto,
-    createProductMaterialDto, createProductSizeDto
+    createProductMaterialDto, createProductSizeDto, createProductFeatureDto
 } from './dto';
 import { BaseRepository } from '@/prisma/base.repository';
 import { Prisma } from '@prisma/client';
@@ -79,6 +79,15 @@ export class ProductRepository extends BaseRepository {
         return newProductSizes;
     }
 
+    async createProductFeatures(data: createProductFeatureDto[], tx?: Prisma.TransactionClient) {
+        const client = tx ?? this.prisma;
+        const newProductFeatures = await client.features.createMany({
+            data,
+        });
+
+        return newProductFeatures;
+    }
+
     async getAll() {
         return this.prisma.product.findMany({
             include: {
@@ -124,6 +133,20 @@ export class ProductRepository extends BaseRepository {
             {
                 where: { id: id },
             }
+        )
+        return res;
+    }
+
+    async getProductsByCategory(id: number) {
+        const res = await this.prisma.product.findMany(
+            {
+                where: { category_id: id },
+                include: {
+                    product_Images: true,
+                    rates: true,
+                }
+            }
+
         )
         return res;
     }

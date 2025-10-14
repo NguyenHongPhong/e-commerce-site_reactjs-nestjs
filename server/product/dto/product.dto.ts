@@ -5,29 +5,34 @@ import { ImageDto } from './image.dto';
 export class ProductDto {
     @IsString()
     @IsNotEmpty()
-    title?: string;
+    title!: string;
 
     @IsArray()
     @IsString({ each: true })
-    colors?: string[];
+    colors!: string[];
 
     @IsArray()
     @IsString({ each: true })
-    sizes?: string[];
+    sizes!: string[];
 
     @IsArray()
     @IsString({ each: true })
-    materials?: string[];
+    materials!: string[];
+
+    @IsArray()
+    @IsString({ each: true })
+    features!: string[];
 
     @IsNumberString()
-    price?: string;
+    price!: string;
 
     @IsString()
-    description?: string;
+    description!: string;
+
 
     @ValidateNested({ each: true })
     @Type(() => ImageDto)
-    images?: ImageDto[];
+    images!: ImageDto[];
 }
 
 
@@ -105,4 +110,17 @@ export class createProductSizeDto {
     @IsNotEmpty()
     name!: string;
 }
+
+
+export class createProductFeatureDto {
+    @IsString()
+    @IsNotEmpty()
+    product_id!: string;
+
+    @IsString()
+    @IsNotEmpty()
+    feature!: string;
+}
+
+
 

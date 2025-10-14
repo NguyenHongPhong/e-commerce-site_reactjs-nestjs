@@ -197,7 +197,17 @@ model Product {
   materials      Material[]
   sizes          Size[]
   rates          Rate[]
+  features       Features_Product[]
 }
+
+model Features_Product {
+  id         String  @id @default(uuid())
+  feature    String
+
+  product_id String
+  product    Product @relation(fields: [product_id], references: [id]) 
+}
+
 
 model Color {
   id         Int     @id @default(autoincrement())
