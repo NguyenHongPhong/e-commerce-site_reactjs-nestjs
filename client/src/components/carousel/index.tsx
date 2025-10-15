@@ -17,7 +17,6 @@ function CustomCarousel<T>({ items, renderItem, fullSlider, responsiveCasourel }
     return (
         <Carousel
             responsive={responsiveCasourel}
-            showDots={true}
             containerClass="px-8"
             itemClass={itemClassCss}  // ✅ Quan trọng khi hiển thị card là đánh giá người dùng
             sliderClass="w-full"

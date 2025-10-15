@@ -12,7 +12,7 @@ export interface IProductDto {
     materials?: string[],
     sizes?: string[],
     price?: string,
-    features: { value: string }[];
+    features: string[];
 }
 
 export interface IGalleryProductDto {
@@ -101,4 +101,10 @@ export interface ICustomListProps<T> {
     renderItem: (item: T, idx: number) => ReactElement;
     fullSlider?: boolean;
     responsiveCasourel: IResponsiveCasourel
+}
+
+export interface IFeature {
+    id: string,
+    feature: string,
+    product_id: string
 }

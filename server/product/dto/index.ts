@@ -1,6 +1,6 @@
 export {
     ProductDto, CreateProductDto, createProductImgDto, createProductColorDto,
-    createProductMaterialDto, createProductSizeDto, createProductFeatureDto
+    createProductMaterialDto, createProductSizeDto, createProductFeatureDto, FeatureItem
 } from "./product.dto";
 export { CategoryDto, createCategoryDro, createCategoryImgDto } from "./category.dto";
 export { ImageDto } from "./image.dto";

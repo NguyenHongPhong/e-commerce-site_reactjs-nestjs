@@ -7,7 +7,7 @@ import { faHeart } from "@fortawesome/free-regular-svg-icons";
 import { useState } from "react";
 import Tabs from "@components/tabs";
 import CustomCarousel from "@components/carousel";
-import { ICommentUser, IResponsiveCasourel, ISimilarProduct } from "@uiTypes/dto/product.dto";
+import { ICommentUser, IResponsiveCasourel, ISimilarProduct, IFeature } from "@uiTypes/dto/product.dto";
 import { StarRating } from "@components/StarRating";
 function DetailPage() {
     const { id } = useParams();
@@ -196,11 +196,10 @@ function DetailPage() {
                     idx: 1,
                     label: "Features",
                     content: <div>
+                        <h3 className="font-medium mb-2">The features of product: </h3>
                         <ul>
-                            <li>a</li>
-                            <li>a</li>
-                            <li>a</li>
-                            <li>a</li>
+                            {product.product.features.map((feat: IFeature, index: number) => (
+                                <li key={index} className="flex items-center gap-2"><FontAwesomeIcon icon={faPlus} className="text-[12px]" color="green" />{`${feat.feature}`}</li>))}
                         </ul>
                     </div>
                 },

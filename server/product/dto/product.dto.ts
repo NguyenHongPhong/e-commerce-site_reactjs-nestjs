@@ -122,5 +122,7 @@ export class createProductFeatureDto {
     feature!: string;
 }
 
+export type FeatureItem = { value: string };
+
 
 

@@ -54,7 +54,7 @@ export default function ProductForm() {
                 colors: [],
                 materials: [],
                 sizes: [],
-                features: [{ value: "" }]
+                features: []
             },
             mode: "onSubmit",
         });
@@ -278,7 +278,7 @@ export default function ProductForm() {
                         {fields.map((field, index) => (
                             <div key={field.id} className="flex gap-2 my-2 items-center">
                                 <input
-                                    {...register(`features.${index}.value`)}
+                                    {...register(`features.${index}`)}
                                     className="border px-2 py-1 rounded-lg"
                                     placeholder={`Feature ${index + 1}`}
                                 />
@@ -286,7 +286,7 @@ export default function ProductForm() {
                             </div>
                         ))}
 
-                        <FontAwesomeIcon icon={faSquarePlus} className={`hover:cursor-pointer text-cyan-600 translate-y-0.5 ${fields.length > 0 ? `` : `ml-2`}`} size="1x" onClick={() => append({ value: "" })} />
+                        <FontAwesomeIcon icon={faSquarePlus} className={`hover:cursor-pointer text-cyan-600 translate-y-0.5 ${fields.length > 0 ? `` : `ml-2`}`} size="1x" onClick={() => append("")} />
 
                         {errors.features && (
                             <p className="text-red-500 text-sm mt-1">

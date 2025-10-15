@@ -81,7 +81,7 @@ export class ProductRepository extends BaseRepository {
 
     async createProductFeatures(data: createProductFeatureDto[], tx?: Prisma.TransactionClient) {
         const client = tx ?? this.prisma;
-        const newProductFeatures = await client.features.createMany({
+        const newProductFeatures = await client.features_Product.createMany({
             data,
         });
 
@@ -121,7 +121,8 @@ export class ProductRepository extends BaseRepository {
                 materials: true,
                 product_Images: true,
                 rates: true,
-                sizes: true
+                sizes: true,
+                features: true
             }
         })
 
